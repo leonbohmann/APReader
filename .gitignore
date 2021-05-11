@@ -141,6 +141,8 @@ dmypy.json
 # pytype static type analyzer
 .pytype/
 
+*.code-workspace
+
 # operating system-related files
 # file properties cache/storage on macOS
 *.DS_Store

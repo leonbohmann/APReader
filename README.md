@@ -27,7 +27,7 @@ It's that simple.
 
 ## Release History
 
-* Version 1.0.1
+* Version 1.0.2
     * Convert catman files
 
 ## Meta
