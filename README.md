@@ -27,12 +27,12 @@ It's that simple.
 
 ## Release History
 
-* Version 1.0.0
+* Version 1.0.1
     * Convert catman files
 
 ## Meta
 
-Leon Bohmann – leon.bohmann@mepla.net
+Leon Bohmann – info@leonbohmann.de
 
 Distributed under the MIT license. See ``LICENSE`` for more information.
 

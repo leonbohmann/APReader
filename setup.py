@@ -11,17 +11,17 @@ README = (HERE / "README.md").read_text()
 # This call to setup() does all the work
 setup(
     name="apreader",
-    version="1.0.0",
+    version="1.0.1",
     description="Import data from CatmanAP binary files.",
     long_description=README,
     long_description_content_type="text/markdown",
     url="https://github.com/leonbohmann/apreader",
     author="Leon Bohmann",
-    author_email="leon.bohmann@mepla.net",
+    author_email="info@leonbohmann.de",
     license="MIT",
     classifiers=[
         "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python :: 3.9.4",
+        "Programming Language :: Python :: 3.9",
     ],
     packages=setuptools.find_packages(),
     include_package_data=True,
