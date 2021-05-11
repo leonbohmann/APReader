@@ -1,5 +1,6 @@
 import pathlib
 from setuptools import setup
+import setuptools
 
 # The directory containing this file
 HERE = pathlib.Path(__file__).parent
@@ -15,20 +16,13 @@ setup(
     long_description=README,
     long_description_content_type="text/markdown",
     url="https://github.com/leonbohmann/apreader",
-    author="Real Python",
-    author_email="info@realpython.com",
+    author="Leon Bohmann",
+    author_email="leon.bohmann@mepla.net",
     license="MIT",
     classifiers=[
         "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.9.4",
     ],
-    packages=["reader"],
+    packages=setuptools.find_packages(),
     include_package_data=True,
-    install_requires=["feedparser", "html2text"],
-    entry_points={
-        "console_scripts": [
-            "realpython=reader.__main__:main",
-        ]
-    },
 )

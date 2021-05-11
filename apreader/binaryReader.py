@@ -6,6 +6,9 @@ ENDIAN_PREFIXES = ("@", "<", ">", "=", "!")
 
 
 class BinaryReader:
+    """
+    Base class to read binary files.
+    """
     def __init__(self, buf: BinaryIO, endian: str = "@") -> None:
         self.buf = buf
         self.endian = endian
@@ -54,7 +57,5 @@ class BinaryReader:
     def read_double(self) -> float:
         return struct.unpack(self.endian + "d", self.read(8))[0]
     # Aliases
-
     def read_int(self) -> int:
         return self.read_int32()
-
