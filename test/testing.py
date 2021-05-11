@@ -10,5 +10,5 @@ reader = APReader(file)
 
 # plot every channel
 for chan in reader.Channels:
-    chan.plot()
+    chan.plot('mat')
 

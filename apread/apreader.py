@@ -4,6 +4,7 @@ from os import SEEK_SET
 from typing import List
 # import this to show warnings
 import warnings
+from tqdm import tqdm
 
 # channel definition
 from apread.channel import Channel
@@ -53,11 +54,15 @@ class APReader:
             # append the channel to the dictionary's entry
             channelGroups[channel.length].append(channel)
                 
-        # now, for each channel-group find the time-channel
-        for group in [channelGroups[groupLen] for groupLen in channelGroups]:
+        # now, for each channel-group find the time-channel (only if length of the gorup > 0)
+        for group in [channelGroups[groupLen] for groupLen in channelGroups if groupLen > 0]:
             # sometimes only one channel is in the group
             if len(group) < 2:
+                for chan in group:
+                    chan.broken = True
+                    self.Channels.remove(chan)
                 continue
+            
             
             # find the time channel in the group
             timeChannel = None            
@@ -107,6 +112,7 @@ class APReader:
 
             # total number of channels
             self.numChannels = reader.read_int16()
+            print(f"\t[ APREAD ] Found {self.numChannels} Channels in {os.path.basename(self.filepath)}.")
             # maximum channel length (usually 0 meaning unlimited)
             self.maxLength = reader.read_int32()
 
@@ -123,16 +129,21 @@ class APReader:
                 # be careful with current stream position
                 channel = Channel(reader)
 
-                if not channel.broken:
+                if not channel.broken and channel.length > 0:                    
                     self.Channels.append(channel)
+                else:
+                    print(f'\t[ APREAD ] Skipping channel (zero length or invalid data)')
 
             # seek stream pointer to start of data
             reader.seek(self.dataOffset, SEEK_SET)
 
-            # loop through channels again and access data one after another
-            for channel in self.Channels:
-                channel.readData()
-            
-        # Done with this file
-        print(f"\tFound {len(self.Channels)} Channels in {os.path.basename(self.filepath)}.")
 
+            print('\t[ APREAD ] Reading Channels...')
+            # loop through channels again and access data one after another
+            for channel in tqdm(self.Channels, leave=False):
+                channel.readData()
+
+            print(f'\t[ APREAD ] Done. {len(self.Channels)} Channels left after filtering.')
+
+                    
+            

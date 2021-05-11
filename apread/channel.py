@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import plotly.express as px
 import scipy.signal as sig
 
+from tqdm import tqdm
 class Channel:
     """
     Holds data of a Catman Channel.    
@@ -92,25 +93,36 @@ class Channel:
         # initialize data
         self.data = []
         # read all channel data
-        for i in range(self.length):
+        for i in tqdm(range(self.length), leave=False):
             self.data.append(self.reader.read_double())                
 
 
-    def plot(self):
+    def plot(self, mode = 'ply'):
         """
         Plot the channel over its connected time-channel.
+
+        mode:
+            'ply'   Plotly
+            'mat'   matplotlib
         """
         # cant plot time over time
         if self.isTime:
-            print("\t[WARNING] Channel is time.")
+            print("\t[ APREAD/PLOT ] Channel is time. Not plotting.")
             return
 
+        print(f'\t[ APREAD/PLOT ] Filtering plot for {self.name}')
         # filter data
         datay = sig.wiener(self.data)
-    
 
-        fig = px.line(x = self.Time.data, y = datay, title = f'{self.name}')
-        fig.show()
+        print(f'\t[ APREAD/PLOT ] Plotting {self.name}')
+        if 'ply' in mode:
+            fig = px.line(x = self.Time.data, y = datay, title = f'{self.name}')
+            fig.show()
+        elif 'mat' in mode:
+            fig = plt.figure(self.name)
+            plt.plot(self.Time.data, datay)
+            plt.draw()
+            plt.show()
 
     def __str__(self):
         """
