@@ -8,6 +8,7 @@ rmdir /Q /S build
 python setup.py sdist bdist_wheel
 
 
-pdoc --html --output-dir docs apread --force
-xcopy /e /k /h /i /q /s /y .\docs\apread .\docs
-rmdir .\docs\apread /Q /S
+
+rem pdoc --html --output-dir docs apread --force
+rem xcopy /e /k /h /i /q /s /y .\docs\apread .\docs
+rem rmdir .\docs\apread /Q /S
