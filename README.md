@@ -40,21 +40,12 @@ for channel in reader.Channels:
 
 ## Release History
 
+* Version 1.0.11
+    * Progressbars indicate read-progress of files
+    * Multiple plot modes
+
 * Version 1.0.0
     * Convert catman files to channels
-
-## Publish
-
-### Modify `setup.py`
-Apply a new version and update `README.md`
-### Build the project
-```python
-python setup.py sdist bdist_wheel
-```
-### Upload the project
-```python
-python -m twine upload --repository-url https://upload.pypi.org/legacy/ dist/*
-```
 
 ## Meta
 
