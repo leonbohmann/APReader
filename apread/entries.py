@@ -7,6 +7,7 @@ import plotly.express as px
 import scipy.signal as sig
 
 from tqdm import tqdm
+
 class Channel:
     """
     Holds data of a Catman Channel.    
@@ -131,3 +132,18 @@ class Channel:
         print(self.name)
         for d in self.data:
             print(d)
+
+
+
+class Group:
+    """
+    Groups channels together.
+
+    Helps calling plot functions..
+    """
+    Channels: list[Channel]
+
+
+    def __init__(self, channels: list[Channel]):
+        self.Channels = channels
+        

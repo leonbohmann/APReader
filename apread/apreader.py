@@ -7,7 +7,7 @@ import warnings
 from tqdm import tqdm
 
 # channel definition
-from apread.channel import Channel
+from apread.entries import Channel, Group
 # binary reader to read binary files
 from apread.binaryReader import BinaryReader
 
@@ -22,9 +22,18 @@ class APReader:
     Members:
     ---------
         filepath        The path to the .bin file.
-        Channels        List with Channels (channels.py).
+        Channels        List with Channels.
+        Groups          List with Groups.
+    """
+
+    """
+    All channels unsorted.    
     """
     Channels: List[Channel]
+    """
+    Grouped channels.    
+    """
+    Groups: List[Group]
 
     def __init__(self, path):
         self.filepath = path
@@ -83,7 +92,9 @@ class APReader:
                         channel.isTime = True
             else:
                 print("\t [WARNING] Channel-group does not contain a time-channel")            
-        
+
+            # create new group based on the groups listed
+            self.Groups.append(Group(group))
         pass
 
         
