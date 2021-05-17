@@ -1,4 +1,4 @@
-import apread
+from apread.apreader import APReader
 import os
 
 # find current directory
@@ -6,9 +6,14 @@ dirname = os.path.dirname(__file__)
 file = os.path.join(dirname, 'testinput.bin')
 
 # create a reader
-reader = apread.APReader(file)
+reader = APReader(file)
 
 # plot every channel
-for chan in reader.Channels:
-    chan.plot('mat')
+#for channel in reader.Channels:
+#    channel.plot('mat')
 
+reader.plot()
+
+
+for group in reader.Groups:
+    group.plot()

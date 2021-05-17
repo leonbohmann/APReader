@@ -4,6 +4,7 @@ from os import SEEK_SET
 from typing import List
 # import this to show warnings
 import warnings
+from matplotlib import pyplot as plt
 from tqdm import tqdm
 
 # channel definition
@@ -38,6 +39,7 @@ class APReader:
     def __init__(self, path):
         self.filepath = path
         self.Channels = []
+        self.Groups = []
         self.read()
         self.connect()
 
@@ -77,7 +79,7 @@ class APReader:
             timeChannel = None            
             for channel in group:
                 # condition: channel name has to contain "Zeit"
-                if str.upper("Zeit") in str.upper(channel.name) or str.upper("Time") in str.upper(channel.name):
+                if str.upper("Zeit") in str.upper(channel.Name) or str.upper("Time") in str.upper(channel.Name):
                     timeChannel = channel
                     # there is only one time-channel
                     break
@@ -158,3 +160,16 @@ class APReader:
 
                     
             
+    def plot(self):
+        """Plots the complete file.
+        """
+        name = os.path.basename(self.filepath)
+        fig = plt.figure(name)
+
+        for group in self.Groups:
+            group.plot(governed=True)
+
+        plt.draw()
+        plt.title(name)
+        plt.legend()
+        plt.show()

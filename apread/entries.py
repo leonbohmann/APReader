@@ -41,7 +41,7 @@ class Channel:
         self.length = reader.read_int32()
         try:
             # get name of channel
-            self.name = reader.read_string(reader.read_int16())
+            self.Name = reader.read_string(reader.read_int16())
 
             # retrieve unit of channel                
             self.unit = reader.read_string(reader.read_int16())
@@ -98,38 +98,54 @@ class Channel:
             self.data.append(self.reader.read_double())                
 
 
-    def plot(self, mode = 'ply'):
+    def plot(self, mode = 'ply', governed = False):
         """
         Plot the channel over its connected time-channel.
 
         mode:
-            'ply'   Plotly
+            'ply'   Plotly,
             'mat'   matplotlib
+
+        governed:
+            States wether the call to this function will handle figures and handles.
+            If False, a single figure will be shown.
         """
         # cant plot time over time
         if self.isTime:
             print("\t[ APREAD/PLOT ] Channel is time. Not plotting.")
             return
 
-        print(f'\t[ APREAD/PLOT ] Filtering plot for {self.name}')
+        print(f'\t[ APREAD/PLOT ] Filtering plot for {self.Name}')
         # filter data
         datay = sig.wiener(self.data)
 
-        print(f'\t[ APREAD/PLOT ] Plotting {self.name}')
+        print(f'\t[ APREAD/PLOT ] Plotting {self.Name}')
         if 'ply' in mode:
-            fig = px.line(x = self.Time.data, y = datay, title = f'{self.name}')
-            fig.show()
+            fig = px.line(x = self.Time.data, y = datay, title = f'{self.Name}')
+            if not governed:
+                fig.show()
+            else:
+                print('Cant handle governed mode and plotly.')
+                return
         elif 'mat' in mode:
-            fig = plt.figure(self.name)
-            plt.plot(self.Time.data, datay)
-            plt.draw()
-            plt.show()
+            if not governed:
+                fig = plt.figure(self.Name)
+                plt.xlabel('Time [s]')
+                plt.ylabel(self.unit)
+
+            plt.plot(self.Time.data, datay, label=self.Name)
+
+            if not governed:
+                plt.title(self.Name)
+                plt.draw()
+                plt.legend()        
+                plt.show()
 
     def __str__(self):
         """
         Default conversion to string.
         """
-        print(self.name)
+        print(self.Name)
         for d in self.data:
             print(d)
 
@@ -142,8 +158,54 @@ class Group:
     Helps calling plot functions..
     """
     Channels: list[Channel]
+    # Name of the time channel of this group
+    Name: str
 
+    # the time-channel
+    ChannelX: Channel
+    # all other data-channels
+    ChannelsY: list[Channel]
 
     def __init__(self, channels: list[Channel]):
+        """Create group of channels.
+
+        Args:
+            channels (list[Channel]): The channels this group is based on.        
+        """
+        # save all channels
         self.Channels = channels
-        
+        # get first channel which is marked as "isTime"
+        time = next((x for x in channels if x.isTime), None)
+        self.ChannelX = time
+
+        if time is None:
+            # if no time found, group cant be shown
+            print('\t[ APREAD/WARNING ] Group does not have a time-channel. Skipping...')
+        else:
+            # get name of time channel
+            self.Name = time.Name
+
+        # get all other channels
+        self.ChannelsY = []
+        for chan in channels:
+            if not chan.isTime:
+                self.ChannelsY.append(chan)
+
+
+    def plot(self, governed=False):
+        """Plots this group of channels
+
+        Args:
+            governed (bool, optional): States wether this plot-function is called from another plot-function. When nesting plot functions, the base function has to call plt.show. Defaults to False.
+        """
+        if not governed:
+            fig = plt.figure(self.Name)
+
+        for channel in self.ChannelsY:
+            channel.plot(mode='mat', governed=True)
+
+        if not governed:
+            plt.title(self.Name)
+            plt.draw()
+            plt.legend()
+            plt.show()

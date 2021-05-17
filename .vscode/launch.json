@@ -15,8 +15,8 @@
             "name": "Testing",
             "type": "python",
             "request": "launch",
-            "cwd": "${workspaceFolder}\\test",
-            "program": "testing.py",
+            "cwd": "${workspaceFolder}",
+            "program": "test\\testing.py",
             "console": "integratedTerminal"
         }
     ]
