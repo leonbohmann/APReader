@@ -43,15 +43,23 @@ for channel in reader.Channels:
     channel.plot()
 ``` 
 
-
 ## Release History
+### **Version 1.0.12 (next version)**
+* Group channels with their time-channel into "groups"
+* Multiple plot modes:
+    * Whole file
+    * Channel/Group only
+* TODO: Output data
+    * JSON
+    * ASC
+    * BLOB
 
-* Version 1.0.11
-    * Progressbars indicate read-progress of files
-    * Multiple plot modes
+### *Version 1.0.11 (current)*
+* Progressbars indicate read-progress of files
+* Multiple plot modes
 
-* Version 1.0.0
-    * Convert catman files to channels
+### *Version 1.0.0*
+* Convert catman files to channels
 
 ## Meta
 
