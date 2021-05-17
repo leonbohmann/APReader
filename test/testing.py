@@ -12,8 +12,8 @@ reader = APReader(file)
 #for channel in reader.Channels:
 #    channel.plot('mat')
 
+# plot every group
+# for group in reader.Groups:
+#     group.plot()
+
 reader.plot()
-
-
-for group in reader.Groups:
-    group.plot()
