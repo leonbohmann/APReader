@@ -1,3 +1,4 @@
+
 [![PyPi Upload](https://github.com/leonbohmann/APReader/actions/workflows/python-publish.yml/badge.svg)](https://github.com/leonbohmann/APReader/actions/workflows/python-publish.yml)
 
 # **apread** (Catman AP Reader)
@@ -6,6 +7,9 @@
 CatmanAP procudes .bin files after each measurement. While it is possible to export as a different format (i.e. txt or asc) it's not efficient because one has to change the export format after every measurement. Here comes the treat: Just export as binary and use this package to work with binary files directly.
 
 After reading all channels from the binary file, the channels are analyzed and every measure-channel will receive a reference to a time channel, depending on the amount of entries in the channels and the fact, that the time-channel has to contain "time" or "zeit" in its name. What that means is, that a channel with x entries and the name "time - 1" will be regarded as the time-channel of any other channel with x Data Entries.
+
+Here is an example plot, generated out of a binary file only:
+![apread_demo_out_1](https://user-images.githubusercontent.com/13386367/118563304-9dffba80-b76e-11eb-8730-c982c2ece7db.png)
 
 ## Installation
 
