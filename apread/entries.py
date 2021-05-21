@@ -1,10 +1,14 @@
 # binary reader import
+import os
 from apread.binaryReader import BinaryReader
 
 # plotting
 import matplotlib.pyplot as plt
 import plotly.express as px
 import scipy.signal as sig
+
+# serialization
+import json
 
 from tqdm import tqdm
 
@@ -209,3 +213,43 @@ class Group:
             plt.draw()
             plt.legend()
             plt.show()
+
+
+    def save(self, mode, path):
+        """Save group as text.
+
+        Args:
+            mode ([type]): [description]
+            path ([type]): [description]
+        """
+        # get total length
+        length = len(self.ChannelX.data)
+        length1 = len(self.ChannelsY)
+        if mode == 'csv':
+            # save as csv
+
+            # write content to file
+            with open(os.path.join(path, self.Name + '.csv'), 'w') as file:
+                for i in tqdm(range(length), desc=f'Writing {self.Name}'):
+                    file.write(f'{self.ChannelX.data[i]}')
+
+                    for j in range(length1):
+                        file.write(f'\t{self.ChannelsY[j].data[i]}')
+
+                    file.write('\n')
+
+        elif mode == 'json':
+            # write content to file
+            with open(os.path.join(path, self.Name + '.json'), 'w') as file:
+                data = {}
+                data['X'] = self.ChannelX.data
+                for j in range(length1):
+                    data[f'Y{j}'] = self.ChannelsY[j].data
+                
+                # output json
+                json.dump(data, file, indent=4)
+
+
+            pass
+            
+        pass
