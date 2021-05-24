@@ -11,6 +11,7 @@ import scipy.signal as sig
 import json
 
 from tqdm import tqdm
+from apread.loader import Loader
 
 class Channel:
     """
@@ -247,7 +248,8 @@ class Group:
                     data[f'Y{j}'] = self.ChannelsY[j].data
                 
                 # output json
-                json.dump(data, file, indent=4)
+                with Loader("Creating JSON-Output..."):
+                    json.dump(data, file, indent=4)
 
 
             pass

@@ -16,7 +16,7 @@ reader = APReader(file)
 # for group in reader.Groups:
 #     group.plot()
 
-reader.plot()
+#reader.plot()
 
 for group in reader.Groups:
     group.save('json', os.path.join(dirname, 'output'))
