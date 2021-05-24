@@ -13,20 +13,7 @@ from apread.entries import Channel, Group
 from apread.binaryReader import BinaryReader
 
 class APReader:
-    """
-    A reader which can read catmanAP binary files.
-
-    Instructions:
-        Do not change the order of readings in "read(self)"! This is crucial since the 
-        input file is formatted as binary.
-
-    Members:
-    ---------
-        filepath        The path to the .bin file.
-        Channels        List with Channels.
-        Groups          List with Groups.
-    """
-
+    
     """
     All channels unsorted.    
     """
@@ -37,6 +24,11 @@ class APReader:
     Groups: List[Group]
 
     def __init__(self, path):
+        """Creates a new APReader based on a .binary file (path).
+
+        Args:
+            path (str): path to a catmanAP binary file.
+        """
         self.filepath = path
         self.Channels = []
         self.Groups = []

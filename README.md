@@ -43,15 +43,40 @@ for channel in reader.Channels:
     channel.plot()
 ``` 
 
+Since Version 1.0.12 you can also call `.plot()` on the newly introduced `reader.Groups`.
+```python
+for group in reader.Groups:
+    # plot the group (plots time and every channel on the y-axis)
+    group.plot()
+    # saves the group into csv-format (delimiter is \t) 
+    # time  y1  y2
+    group.save(mode='csv')
+
+    # saves the group into json-format
+    # dictionary of data: 
+    #   ['X'] : time
+    #   ['Yn'] : y-Channel (where n is index)
+    group.save(mode='json')
+
+``` 
+
 
 ## Release History
+### **Version 1.0.12**
+* Group channels with their time-channel into "groups"
+* Multiple plot modes:
+    * Whole file
+    * Channel/Group only
+* Output data
+    * json
+    * csv
 
-* Version 1.0.11
-    * Progressbars indicate read-progress of files
-    * Multiple plot modes
+### *Version 1.0.11*
+* Progressbars indicate read-progress of files
+* Multiple plot modes
 
-* Version 1.0.0
-    * Convert catman files to channels
+### *Version 1.0.0*
+* Convert catman files to channels
 
 ## Meta
 

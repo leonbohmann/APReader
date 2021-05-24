@@ -5,6 +5,8 @@ import os
 dirname = os.path.dirname(__file__)
 file = os.path.join(dirname, 'testinput.bin')
 
+outdir = os.path.join(dirname, 'output')
+
 # create a reader
 reader = APReader(file)
 
@@ -16,4 +18,11 @@ reader = APReader(file)
 # for group in reader.Groups:
 #     group.plot()
 
-reader.plot()
+#reader.plot()
+
+for group in reader.Groups:
+    group.save('json', outdir)
+for channel in reader.Channels:
+    channel.save('json', outdir)
+
+
