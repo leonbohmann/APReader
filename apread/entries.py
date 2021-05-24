@@ -1,5 +1,6 @@
 # binary reader import
 import os
+from time import time
 from apread.binaryReader import BinaryReader
 
 # plotting
@@ -25,7 +26,7 @@ class Channel:
             If there is more than one channel having the same amount of entries, every channel will 
             get the same reference to the time channel.
     """
-
+    
     
 
     def __init__(self, reader: BinaryReader):
@@ -154,6 +155,73 @@ class Channel:
         for d in self.data:
             print(d)
 
+    def __getitem__(self, key) -> float:
+        """Return the item at index key.
+
+        Args:
+            key (int): index
+
+        Returns:
+            double: self.data[key]
+        """
+        return self.data[key]
+    def save(self, mode, path):
+        """Save group as text.
+
+        Args:
+            mode (str): 'csv' or 'json'
+            path (str): the destination directory(!) path
+        """
+
+        if self.isTime:
+            print('Channel cant be saved since it is a Time-Channel')
+            return
+
+        if self.length == 0:
+            print('Channel has no data and cant be saved.')
+            return
+
+        # get total length
+        length = self.length
+        length1 = 1
+
+        # ensure destination exists
+        dest = os.path.join(path, self.Name + '.json')
+
+        # check if path is a path
+        if not os.path.isdir(path):
+            raise Exception(f'To save a group, supply a path. {path} is not path.')
+        # then, check if the path exists and create if necessary
+        elif not os.path.exists(path):
+            os.makedirs(path)
+
+        # check, which mode to use as save
+        if mode == 'csv':
+            # write content to file
+            with open(dest, 'w') as file:
+                for i in tqdm(range(length), desc=f'Writing CSV: {self.Name}'):
+                    file.write(f'{self.Time.data[i]}')
+
+                    for j in range(length1):
+                        file.write(f'\t{self.data[i]}')
+
+                    file.write('\n')
+            print('\t[ APREAD/Save CSV ] Done.')
+
+        elif mode == 'json':
+            # write content to file
+            with open(dest, 'w') as file:
+                data = {}
+                data['X'] = self.Time.data
+                for j in range(length1):
+                    data[f'Y'] = self.data
+                
+                # output json
+                with Loader(f'Writing JSON: {self.Name}', end='\t[ APREAD/Save JSON ] Done.'):
+                    json.dump(data, file, indent=4)
+
+        else:
+            raise Exception(f"Unknown mode: {mode}")        
 
 
 class Group:
@@ -171,6 +239,12 @@ class Group:
     # all other data-channels
     ChannelsY: list[Channel]
 
+    # the data time interval with a fitting unit
+    intervalstr: str
+    # the data time interval in milliseconds
+    interval: float
+    # frequency of the corresponding time
+    frequency: float
     def __init__(self, channels: list[Channel]):
         """Create group of channels.
 
@@ -180,15 +254,15 @@ class Group:
         # save all channels
         self.Channels = channels
         # get first channel which is marked as "isTime"
-        time = next((x for x in channels if x.isTime), None)
-        self.ChannelX = time
+        timeC = next((x for x in channels if x.isTime), None)
+        self.ChannelX = timeC
 
-        if time is None:
+        if timeC is None:
             # if no time found, group cant be shown
             print('\t[ APREAD/WARNING ] Group does not have a time-channel. Skipping...')
         else:
             # get name of time channel
-            self.Name = time.Name
+            self.Name = timeC.Name
 
         # get all other channels
         self.ChannelsY = []
@@ -196,6 +270,22 @@ class Group:
             if not chan.isTime:
                 self.ChannelsY.append(chan)
 
+        # determine frequency and time delta unit
+        unit = 's'
+        fac = 1
+        if timeC.data[1] < 1:
+            unit = 'ms'
+            fac = 1e3
+        if timeC.data[1] < 1e-3:
+            unit = 'ns'
+            fac = 1e6
+        if timeC.data[1] < 1e-6:
+            unit = 'μs'
+            fac = 1e9
+
+        self.intervalstr = f"{timeC.data[1]*fac:.3f}{unit}"
+        self.interval = timeC[1]/1e3
+        self.frequency = 1/timeC.data[1]
 
     def plot(self, governed=False):
         """Plots this group of channels
@@ -215,6 +305,16 @@ class Group:
             plt.legend()
             plt.show()
 
+    def __getitem__(self, key):
+        """Return the time and all y-channels at index.
+
+        Args:
+            key (int): index
+
+        Returns:
+            double: self.data[key]
+        """
+        return (self.ChannelX[key], [chan[key] for chan in self.ChannelsY])
 
     def save(self, mode, path):
         """Save group as text.
@@ -227,10 +327,17 @@ class Group:
         length = len(self.ChannelX.data)
         length1 = len(self.ChannelsY)
 
+        # ensure destination exists
+        dest = os.path.join(path, self.Name + '.json')
+
+        # check if path present
+        if not os.path.exists(path):
+            os.makedirs(path)
+
         # check, which mode to use as save
         if mode == 'csv':
             # write content to file
-            with open(os.path.join(path, self.Name + '.csv'), 'w') as file:
+            with open(dest, 'w') as file:
                 for i in tqdm(range(length), desc=f'Writing CSV: {self.Name}'):
                     file.write(f'{self.ChannelX.data[i]}')
 
@@ -238,17 +345,18 @@ class Group:
                         file.write(f'\t{self.ChannelsY[j].data[i]}')
 
                     file.write('\n')
+            print('\t[ APREAD/Save CSV ] Done.')
 
         elif mode == 'json':
             # write content to file
-            with open(os.path.join(path, self.Name + '.json'), 'w') as file:
+            with open(dest, 'w') as file:
                 data = {}
                 data['X'] = self.ChannelX.data
                 for j in range(length1):
                     data[f'Y{j}'] = self.ChannelsY[j].data
                 
                 # output json
-                with Loader(f'Writing JSON: {self.Name}'):
+                with Loader(f'Writing JSON: {self.Name}', end='\t[ APREAD/Save JSON ] Done.'):
                     json.dump(data, file, indent=4)
 
         else:
