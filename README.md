@@ -62,7 +62,7 @@ for group in reader.Groups:
 
 
 ## Release History
-### **Version 1.0.12 (next version)**
+### **Version 1.0.12**
 * Group channels with their time-channel into "groups"
 * Multiple plot modes:
     * Whole file
@@ -71,7 +71,7 @@ for group in reader.Groups:
     * json
     * csv
 
-### *Version 1.0.11 (current)*
+### *Version 1.0.11*
 * Progressbars indicate read-progress of files
 * Multiple plot modes
 
