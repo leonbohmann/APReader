@@ -13,7 +13,7 @@ README = (HERE / "README.md").read_text()
 # This call to setup() does all the work
 setup(
     name="apread",
-    version="1.0.12",
+    version="1.0.13",
     description="Import data from CatmanAP binary files.",
     long_description=README,
     long_description_content_type="text/markdown",
