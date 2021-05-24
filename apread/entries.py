@@ -220,18 +220,18 @@ class Group:
         """Save group as text.
 
         Args:
-            mode ([type]): [description]
-            path ([type]): [description]
+            mode (str): 'csv' or 'json'
+            path (str): the destination directory(!) path
         """
         # get total length
         length = len(self.ChannelX.data)
         length1 = len(self.ChannelsY)
-        if mode == 'csv':
-            # save as csv
 
+        # check, which mode to use as save
+        if mode == 'csv':
             # write content to file
             with open(os.path.join(path, self.Name + '.csv'), 'w') as file:
-                for i in tqdm(range(length), desc=f'Writing {self.Name}'):
+                for i in tqdm(range(length), desc=f'Writing CSV: {self.Name}'):
                     file.write(f'{self.ChannelX.data[i]}')
 
                     for j in range(length1):
@@ -248,10 +248,8 @@ class Group:
                     data[f'Y{j}'] = self.ChannelsY[j].data
                 
                 # output json
-                with Loader("Creating JSON-Output..."):
+                with Loader(f'Writing JSON: {self.Name}'):
                     json.dump(data, file, indent=4)
 
-
-            pass
-            
-        pass
+        else:
+            raise Exception(f"Unknown mode: {mode}")        

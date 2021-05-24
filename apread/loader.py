@@ -7,7 +7,6 @@ from shutil import get_terminal_size
 from threading import Thread
 from time import sleep
 
-
 class Loader:
     """Busy symbol.
 
@@ -17,7 +16,7 @@ class Loader:
         # do something
         pass          
     """
-    def __init__(self, desc="Loading...", end="Done!", timeout=0.1):
+    def __init__(self, desc="Loading...", end="Done!", timeout=0.1, mode='prog'):
         """
         A loader-like context manager
 
@@ -31,8 +30,15 @@ class Loader:
         self.timeout = timeout
 
         self._thread = Thread(target=self._animate, daemon=True)
-        # self.steps = ["⢿", "⣻", "⣽", "⣾", "⣷", "⣯", "⣟", "⡿"]
-        self.steps = [".", "-", "^", "^"]
+        if mode == 'std1':
+            self.steps = ["⢿", "⣻", "⣽", "⣾", "⣷", "⣯", "⣟", "⡿"]
+        elif mode == 'std2':
+            self.steps = ["◜","◠","◝","◞","◡","◟"]
+        elif mode == 'std3':
+            self.steps = ["😐 ","😐 ","😮 ","😮 ","😦 ","😦 ","😧 ","😧 ","🤯 ","💥 ","✨ ","\u3000 ","\u3000 ","\u3000 "]
+        elif mode == 'prog':
+            self.steps = ["[∙∙∙]","[●∙∙]","[∙●∙]","[∙∙●]","[∙∙∙]"]
+
         self.done = False
 
     def start(self):
@@ -43,7 +49,7 @@ class Loader:
         for c in cycle(self.steps):
             if self.done:
                 break
-            print(f"\r{self.desc} {c}", flush=True, end="")
+            print(f"\r{c} [green]{self.desc} ", flush=True, end="")
             sleep(self.timeout)
 
     def __enter__(self):
