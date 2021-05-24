@@ -328,7 +328,7 @@ class Group:
         length1 = len(self.ChannelsY)
 
         # ensure destination exists
-        dest = os.path.join(path, self.Name + '.json')
+        dest = os.path.join(path, self.Name + f'.{mode}')
 
         # check if path present
         if not os.path.exists(path):
