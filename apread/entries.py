@@ -195,11 +195,8 @@ class Channel:
         # ensure destination exists
         dest = os.path.join(path, self.fullName + '.json')
 
-        # check if path is a path
-        if not os.path.isdir(path):
-            raise Exception(f'To save a channel, supply a path. {path} is not path.')
-        # then, check if the path exists and create if necessary
-        elif not os.path.exists(path):
+        # check if the path exists and create if necessary
+        if not os.path.exists(path):
             os.makedirs(path)
 
         # check, which mode to use as save

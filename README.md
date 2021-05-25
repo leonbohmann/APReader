@@ -70,7 +70,7 @@ reader.save(mode='json')
 
 ## Release History
 ### **Version 1.0.15**
-* NEW RELEASE FILL WITH INFO
+* Fixed an issue with saving and non-existent directories
 ### Version 1.0.14
 * Output file-names updated
 ### Version 1.0.12/13
