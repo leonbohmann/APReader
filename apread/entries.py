@@ -227,7 +227,7 @@ class Channel:
         # check, which mode to use as save
         if mode == 'csv':
             # write content to file
-            for i in tqdm(range(length), desc=f'Writing CSV: {self.Name}'):
+            for i in tqdm(range(length), desc=f'Create CSV: {self.Name}'):
                 content += (f'{self.Time.data[i]}')
 
                 for j in range(length1):
@@ -245,7 +245,7 @@ class Channel:
                 data[f'Y'] = self.data
             
             # output json
-            with Loader(f'Writing JSON: {self.Name}', end=f'\t☑ [ {self.fullName} → JSON ]'):
+            with Loader(f'Create JSON: {self.Name}', end=f'\t☑ [ {self.fullName} → JSON ]'):
                 return json.dumps(data, indent=4)
 
         else:
@@ -375,30 +375,46 @@ class Group:
         if not os.path.exists(path):
             os.makedirs(path)
 
+        content = self.getas(mode)
+        with open(dest, 'w') as file:
+            file.write(content)
+        
+
+    def getas(self, mode):
+        """Save group as text.
+
+        Args:
+            mode (str): 'csv' or 'json'
+            path (str): the destination directory(!) path
+        """
+        # get total length
+        length = len(self.ChannelX.data)
+        length1 = len(self.ChannelsY)
+
+        content = ""
+
         # check, which mode to use as save
         if mode == 'csv':
-            # write content to file
-            with open(dest, 'w') as file:
-                for i in tqdm(range(length), desc=f'Writing CSV: {self.Name}'):
-                    file.write(f'{self.ChannelX.data[i]}')
+            
+            for i in tqdm(range(length), desc=f'Create CSV: {self.Name}'):
+                content += (f'{self.ChannelX.data[i]}')
 
-                    for j in range(length1):
-                        file.write(f'\t{self.ChannelsY[j].data[i]}')
+                for j in range(length1):
+                    content += (f'\t{self.ChannelsY[j].data[i]}')
 
-                    file.write('\n')
+                content += ('\n')
             print(f'\t☑ [ {self.fullName} → CSV ] ✓.')
 
         elif mode == 'json':
             # write content to file
-            with open(dest, 'w') as file:
-                data = {}
-                data['X'] = self.ChannelX.data
-                for j in range(length1):
-                    data[f'Y{j}'] = self.ChannelsY[j].data
-                
-                # output json
-                with Loader(f'Writing JSON: {self.Name}', end=f'\t☑ [ {self.fullName} → JSON ]'):
-                    json.dump(data, file, indent=4)
+            data = {}
+            data['X'] = self.ChannelX.data
+            for j in range(length1):
+                data[f'Y{j}'] = self.ChannelsY[j].data
+            
+            # output json
+            with Loader(f'Create JSON: {self.Name}', end=f'\t☑ [ {self.fullName} → JSON ]'):
+                return json.dumps(data, indent=4)
 
         else:
             raise Exception(f"Unknown mode: {mode}")        

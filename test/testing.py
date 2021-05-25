@@ -27,7 +27,7 @@ reader.save('json')
 # reader.save('json', outdir)
 
 # # equivalent to the one before
-# for channel in reader.Channels:
-#     channel.save('json', outdir)
-# for group in reader.Groups:
-#     group.save('json', outdir)
+for channel in reader.Channels:
+    print (channel.getas('json'))
+for group in reader.Groups:
+    print (group.getas('json'))
