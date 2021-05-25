@@ -29,12 +29,13 @@ class Channel:
     
     
 
-    def __init__(self, reader: BinaryReader):
+    def __init__(self, reader: BinaryReader, fileName='unknown'):
         """
         Creates the Channel.
 
         Uses a reader (BinaryReader) to read the data from the file accessed by "APReader.__init__".
         """
+        
         # referenced time channel (dummy, since this may stay None)
         self.Time = None
         self.isTime = False
@@ -48,6 +49,11 @@ class Channel:
         try:
             # get name of channel
             self.Name = reader.read_string(reader.read_int16())
+
+            # the original file name of the group
+            self.fileName = os.path.splitext(os.path.basename(fileName))[0]
+            tName = self.Name.replace(' ',"_")  # temporary name
+            self.fullName = f"{fileName}.{tName}"
 
             # retrieve unit of channel                
             self.unit = reader.read_string(reader.read_int16())
@@ -165,32 +171,33 @@ class Channel:
             double: self.data[key]
         """
         return self.data[key]
+
     def save(self, mode, path):
-        """Save group as text.
+        """Save channel as text.
 
         Args:
             mode (str): 'csv' or 'json'
             path (str): the destination directory(!) path
         """
 
-        if self.isTime:
-            print('Channel cant be saved since it is a Time-Channel')
-            return
+        # if self.isTime:
+        #     print('\t☐ Channel cant be saved since it is a Time-Channel')
+        #     return
 
-        if self.length == 0:
-            print('Channel has no data and cant be saved.')
-            return
+        # if self.length == 0:
+        #     print('\t☐ Channel has no data and cant be saved.')
+        #     return
 
         # get total length
         length = self.length
         length1 = 1
 
         # ensure destination exists
-        dest = os.path.join(path, self.Name + '.json')
+        dest = os.path.join(path, self.fullName + '.json')
 
         # check if path is a path
         if not os.path.isdir(path):
-            raise Exception(f'To save a group, supply a path. {path} is not path.')
+            raise Exception(f'To save a channel, supply a path. {path} is not path.')
         # then, check if the path exists and create if necessary
         elif not os.path.exists(path):
             os.makedirs(path)
@@ -206,7 +213,7 @@ class Channel:
                         file.write(f'\t{self.data[i]}')
 
                     file.write('\n')
-            print('\t[ APREAD/Save CSV ] Done.')
+            print(f'\t☑ [ {self.fullName} → CSV ].')
 
         elif mode == 'json':
             # write content to file
@@ -217,7 +224,7 @@ class Channel:
                     data[f'Y'] = self.data
                 
                 # output json
-                with Loader(f'Writing JSON: {self.Name}', end='\t[ APREAD/Save JSON ] Done.'):
+                with Loader(f'Writing JSON: {self.Name}', end=f'\t☑ [ {self.fullName} → JSON ]'):
                     json.dump(data, file, indent=4)
 
         else:
@@ -230,6 +237,7 @@ class Group:
 
     Helps calling plot functions..
     """
+    # all (unsorted) channels in this group
     Channels: list[Channel]
     # Name of the time channel of this group
     Name: str
@@ -245,12 +253,18 @@ class Group:
     interval: float
     # frequency of the corresponding time
     frequency: float
-    def __init__(self, channels: list[Channel]):
+
+    # the file this group is located in
+    fileName: str
+    # fully qualifying name
+    fullName: str
+    def __init__(self, channels: list[Channel], fileName='unknown'):
         """Create group of channels.
 
         Args:
             channels (list[Channel]): The channels this group is based on.        
         """
+          
         # save all channels
         self.Channels = channels
         # get first channel which is marked as "isTime"
@@ -263,6 +277,12 @@ class Group:
         else:
             # get name of time channel
             self.Name = timeC.Name
+
+        # the original file name of the group
+        self.fileName = os.path.splitext(os.path.basename(fileName))[0]
+        tName = self.Name.replace(' ',"_")  # temporary name
+        self.fullName = f"{fileName}.{tName}"
+
 
         # get all other channels
         self.ChannelsY = []
@@ -328,7 +348,7 @@ class Group:
         length1 = len(self.ChannelsY)
 
         # ensure destination exists
-        dest = os.path.join(path, self.Name + f'.{mode}')
+        dest = os.path.join(path, self.fullName + f'.{mode}')
 
         # check if path present
         if not os.path.exists(path):
@@ -345,7 +365,7 @@ class Group:
                         file.write(f'\t{self.ChannelsY[j].data[i]}')
 
                     file.write('\n')
-            print('\t[ APREAD/Save CSV ] Done.')
+            print(f'\t☑ [ {self.fullName} → CSV ] ✓.')
 
         elif mode == 'json':
             # write content to file
@@ -356,7 +376,7 @@ class Group:
                     data[f'Y{j}'] = self.ChannelsY[j].data
                 
                 # output json
-                with Loader(f'Writing JSON: {self.Name}', end='\t[ APREAD/Save JSON ] Done.'):
+                with Loader(f'Writing JSON: {self.Name}', end=f'\t☑ [ {self.fullName} → JSON ]'):
                     json.dump(data, file, indent=4)
 
         else:
