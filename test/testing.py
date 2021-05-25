@@ -23,11 +23,11 @@ reader = APReader(file)
 # save all entries as json
 reader.save('json')
 
-# specify output directory
-reader.save('json', outdir)
+# # specify output directory
+# reader.save('json', outdir)
 
-# equivalent to the one before
-for channel in reader.Channels:
-    channel.save('json', outdir)
-for group in reader.Groups:
-    group.save('json', outdir)
+# # equivalent to the one before
+# for channel in reader.Channels:
+#     channel.save('json', outdir)
+# for group in reader.Groups:
+#     group.save('json', outdir)
