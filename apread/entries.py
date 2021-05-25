@@ -179,7 +179,7 @@ class Channel:
             mode (str): 'csv' or 'json'
             path (str): the destination directory(!) path
         """
-
+        
         if self.isTime:
          #   print('\t☐ Channel cant be saved since it is a Time-Channel')
             return
@@ -199,30 +199,54 @@ class Channel:
         if not os.path.exists(path):
             os.makedirs(path)
 
+        content = self.getas(mode)
+        
+        with open(dest, 'w') as file:
+            file.write(content)
+            
+
+    def getas(self, mode):
+        """Save channel as text.
+
+        Args:
+            mode (str): 'csv' or 'json'
+            path (str): the destination directory(!) path
+        """
+
+        if self.isTime:
+            return
+
+        if self.length == 0:
+            return
+
+        # get total length
+        length = self.length
+        length1 = 1
+
+        content = ""
         # check, which mode to use as save
         if mode == 'csv':
             # write content to file
-            with open(dest, 'w') as file:
-                for i in tqdm(range(length), desc=f'Writing CSV: {self.Name}'):
-                    file.write(f'{self.Time.data[i]}')
+            for i in tqdm(range(length), desc=f'Writing CSV: {self.Name}'):
+                content += (f'{self.Time.data[i]}')
 
-                    for j in range(length1):
-                        file.write(f'\t{self.data[i]}')
+                for j in range(length1):
+                    content += (f'\t{self.data[i]}')
 
-                    file.write('\n')
+                content += ('\n')
             print(f'\t☑ [ {self.fullName} → CSV ].')
 
         elif mode == 'json':
             # write content to file
-            with open(dest, 'w') as file:
-                data = {}
-                data['X'] = self.Time.data
-                for j in range(length1):
-                    data[f'Y'] = self.data
-                
-                # output json
-                with Loader(f'Writing JSON: {self.Name}', end=f'\t☑ [ {self.fullName} → JSON ]'):
-                    json.dump(data, file, indent=4)
+            
+            data = {}
+            data['X'] = self.Time.data
+            for j in range(length1):
+                data[f'Y'] = self.data
+            
+            # output json
+            with Loader(f'Writing JSON: {self.Name}', end=f'\t☑ [ {self.fullName} → JSON ]'):
+                return json.dumps(data, indent=4)
 
         else:
             raise Exception(f"Unknown mode: {mode}")        
