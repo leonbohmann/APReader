@@ -180,13 +180,13 @@ class Channel:
             path (str): the destination directory(!) path
         """
 
-        # if self.isTime:
-        #     print('\t☐ Channel cant be saved since it is a Time-Channel')
-        #     return
+        if self.isTime:
+         #   print('\t☐ Channel cant be saved since it is a Time-Channel')
+            return
 
-        # if self.length == 0:
-        #     print('\t☐ Channel has no data and cant be saved.')
-        #     return
+        if self.length == 0:
+         #   print('\t☐ Channel has no data and cant be saved.')
+            return
 
         # get total length
         length = self.length
