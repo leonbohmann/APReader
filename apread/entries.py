@@ -246,11 +246,12 @@ class Channel:
             
             # output json
             with Loader(f'Create JSON: {self.Name}', end=f'\t☑ [ {self.fullName} → JSON ]'):
-                return json.dumps(data, indent=4)
+                content = json.dumps(data, indent=4)
 
         else:
             raise Exception(f"Unknown mode: {mode}")        
 
+        return content
 
 class Group:
     """
@@ -403,6 +404,7 @@ class Group:
                     content += (f'\t{self.ChannelsY[j].data[i]}')
 
                 content += ('\n')
+
             print(f'\t☑ [ {self.fullName} → CSV ] ✓.')
 
         elif mode == 'json':
@@ -414,7 +416,9 @@ class Group:
             
             # output json
             with Loader(f'Create JSON: {self.Name}', end=f'\t☑ [ {self.fullName} → JSON ]'):
-                return json.dumps(data, indent=4)
+                content = json.dumps(data, indent=4)
 
         else:
             raise Exception(f"Unknown mode: {mode}")        
+
+        return content
