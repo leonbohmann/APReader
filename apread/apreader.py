@@ -23,12 +23,14 @@ class APReader:
     """
     Groups: List[Group]
 
-    def __init__(self, path):
+    def __init__(self, path, verbose=False):
         """Creates a new APReader based on a .binary file (path).
 
         Args:
             path (str): path to a catmanAP binary file.
+            verbose (boolean): Show debug output.
         """
+        self.verbose = verbose
         self.filepath = path
         self.fileName = os.path.splitext(os.path.basename(path))[0]
         self.Channels = []
@@ -85,11 +87,11 @@ class APReader:
                         channel.isTime = False
                     else:
                         channel.isTime = True
-            else:
+            elif self.verbose:
                 print("\t [WARNING] Channel-group does not contain a time-channel")            
 
             # create new group based on the groups listed
-            self.Groups.append(Group(group, self.fileName))
+            self.Groups.append(Group(group, self.fileName, self.verbose))
         pass
 
     def __iter__(self):
@@ -140,7 +142,8 @@ class APReader:
 
             # total number of channels
             self.numChannels = reader.read_int16()
-            print(f"\t[ {self.fileName} ] Found {self.numChannels} Channels.")
+            if self.verbose:
+                print(f"\t[ {self.fileName} ] Found {self.numChannels} Channels.")
             # maximum channel length (usually 0 meaning unlimited)
             self.maxLength = reader.read_int32()
 
@@ -155,23 +158,25 @@ class APReader:
             for i in range(self.numChannels):
                 # create new channel on top of reader
                 # be careful with current stream position
-                channel = Channel(reader, self.fileName)
+                channel = Channel(reader, self.fileName, self.verbose)
 
                 if not channel.broken and channel.length > 0:                    
                     self.Channels.append(channel)
-                else:
+                elif self.verbose:
                     print(f'\t[ {self.fileName} ] Skipping channel (zero length or invalid data)')
 
             # seek stream pointer to start of data
             reader.seek(self.dataOffset, SEEK_SET)
 
+            if self.verbose:
+                print(f'\t[ {self.fileName} ] Reading Channels...')
 
-            print(f'\t[ {self.fileName} ] Reading Channels...')
             # loop through channels again and access data one after another
             for channel in tqdm(self.Channels, leave=False):
                 channel.readData()
 
-            print(f'\t[ {self.fileName} ] Done. {len(self.Channels)} Channels left after filtering.')
+            if self.verbose:
+                print(f'\t[ {self.fileName} ] Done. {len(self.Channels)} Channels left after filtering.')
 
                     
             

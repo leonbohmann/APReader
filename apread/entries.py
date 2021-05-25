@@ -29,13 +29,14 @@ class Channel:
     
     
 
-    def __init__(self, reader: BinaryReader, fileName='unknown'):
+    def __init__(self, reader: BinaryReader, fileName='unknown', verbose=False):
         """
         Creates the Channel.
 
         Uses a reader (BinaryReader) to read the data from the file accessed by "APReader.__init__".
         """
-        
+        self.verbose = verbose
+
         # referenced time channel (dummy, since this may stay None)
         self.Time = None
         self.isTime = False
@@ -123,15 +124,18 @@ class Channel:
             If False, a single figure will be shown.
         """
         # cant plot time over time
-        if self.isTime:
+        if self.isTime and self.verbose:
             print("\t[ APREAD/PLOT ] Channel is time. Not plotting.")
             return
 
-        print(f'\t[ APREAD/PLOT ] Filtering plot for {self.Name}')
+        if self.verbose:
+            print(f'\t[ APREAD/PLOT ] Filtering plot for {self.Name}')
+
         # filter data
         datay = sig.wiener(self.data)
 
-        print(f'\t[ APREAD/PLOT ] Plotting {self.Name}')
+        if self.verbose:
+            print(f'\t[ APREAD/PLOT ] Plotting {self.Name}')
         if 'ply' in mode:
             fig = px.line(x = self.Time.data, y = datay, title = f'{self.Name}')
             if not governed:
@@ -234,7 +238,8 @@ class Channel:
                     content += (f'\t{self.data[i]}')
 
                 content += ('\n')
-            print(f'\t☑ [ {self.fullName} → CSV ].')
+            if self.verbose:
+                print(f'\t☑ [ {self.fullName} → CSV ].')
 
         elif mode == 'json':
             # write content to file
@@ -245,7 +250,7 @@ class Channel:
                 data[f'Y'] = self.data
             
             # output json
-            with Loader(f'Create JSON: {self.Name}', end=f'\t☑ [ {self.fullName} → JSON ]'):
+            with Loader(f'Create JSON: {self.Name}', end=f'\t☑ [ {self.fullName} → JSON ]' if self.verbose else ""):
                 content = json.dumps(data, indent=4)
 
         else:
@@ -280,20 +285,20 @@ class Group:
     fileName: str
     # fully qualifying name
     fullName: str
-    def __init__(self, channels: list[Channel], fileName='unknown'):
+    def __init__(self, channels: list[Channel], fileName='unknown', verbose=False):
         """Create group of channels.
 
         Args:
             channels (list[Channel]): The channels this group is based on.        
         """
-          
+        self.verbose = verbose
         # save all channels
         self.Channels = channels
         # get first channel which is marked as "isTime"
         timeC = next((x for x in channels if x.isTime), None)
         self.ChannelX = timeC
 
-        if timeC is None:
+        if timeC is None and self.verbose:
             # if no time found, group cant be shown
             print('\t[ APREAD/WARNING ] Group does not have a time-channel. Skipping...')
         else:
@@ -405,7 +410,8 @@ class Group:
 
                 content += ('\n')
 
-            print(f'\t☑ [ {self.fullName} → CSV ] ✓.')
+            if self.verbose:
+                print(f'\t☑ [ {self.fullName} → CSV ] ✓.')
 
         elif mode == 'json':
             # write content to file
@@ -415,7 +421,7 @@ class Group:
                 data[f'Y{j}'] = self.ChannelsY[j].data
             
             # output json
-            with Loader(f'Create JSON: {self.Name}', end=f'\t☑ [ {self.fullName} → JSON ]'):
+            with Loader(f'Create JSON: {self.Name}', end=f'\t☑ [ {self.fullName} → JSON ]' if self.verbose else ""):
                 content = json.dumps(data, indent=4)
 
         else:

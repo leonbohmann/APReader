@@ -16,7 +16,7 @@ class Loader:
         # do something
         pass          
     """
-    def __init__(self, desc="Loading...", end="Done!", timeout=0.1, mode='prog'):
+    def __init__(self, desc="Loading...", end="", timeout=0.1, mode='prog'):
         """
         A loader-like context manager
 
@@ -59,7 +59,9 @@ class Loader:
         self.done = True
         cols = get_terminal_size((80, 20)).columns
         print("\r" + " " * cols, end="", flush=True)
-        print(f"\r{self.end}", flush=True)
+
+        if self.end != "":
+            print(f"\r{self.end}", flush=True)
 
     def __exit__(self, exc_type, exc_value, tb):
         # handle exceptions with those variables ^
