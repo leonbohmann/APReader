@@ -69,9 +69,11 @@ reader.save(mode='json')
 
 
 ## Release History
-### **Version 1.0.14**
+### **Version 1.0.15**
+* NEW RELEASE FILL WITH INFO
+### Version 1.0.14
 * Output file-names updated
-### **Version 1.0.12/13**
+### Version 1.0.12/13
 * Group channels with their time-channel into "groups"
 * Multiple plot modes:
     * Whole file
