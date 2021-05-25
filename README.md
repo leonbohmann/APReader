@@ -8,7 +8,7 @@ CatmanAP procudes .bin files after each measurement. While it is possible to exp
 
 After reading all channels from the binary file, the channels are analyzed and every measure-channel will receive a reference to a time channel, depending on the amount of entries in the channels and the fact, that the time-channel has to contain "time" or "zeit" in its name. What that means is, that a channel with x entries and the name "time - 1" will be regarded as the time-channel of any other channel with x Data Entries.
 
-Here is an example plot, generated out of a binary file only:
+Here is an example plot, generated directly from a binary file:
 ![apread_demo_out_1](https://user-images.githubusercontent.com/13386367/118563304-9dffba80-b76e-11eb-8730-c982c2ece7db.png)
 
 ## Installation
@@ -20,7 +20,7 @@ pip install apread
 ```
 
 
-## Usage example
+## Usage
 
 Lets say you produced a file called `measurements.bin` and you put it in the directory of your python script.
 
@@ -30,6 +30,7 @@ from apread import APReader
 reader = APReader('measurements.bin')
 ``` 
 
+### Print channels
 It's that simple. The `APReader`-Initialization may take some time depending on how large your .bin-File is. Afterwards you can access the `Channels` by accessing the `APReader.Channels` Member. A `Channel` implements `__str__` so you can just call `print(...)` on them. **Be careful** though, since this will print every value in the channel to the console.
 
 ```python
@@ -37,13 +38,15 @@ for channel in reader.Channels:
     print(channel)
 ``` 
 
-Another possibility is to call `Channel.plot()`. This will create a plot of the channel.
+### Plot Channels/Groups
+Another possibility is to call `Channel.plot()`. This will create a plot of the channel. Since Version *1.0.12* you can also call `.plot()` on the newly introduced `reader.Groups`.
 ```python
 for channel in reader.Channels:
     channel.plot()
 ``` 
 
-Since Version 1.0.12 you can also call `.plot()` on the newly introduced `reader.Groups`.
+### Save Channels/Groups
+Use `save(mode, path)` to save a channel or group into a directory. The resulting file name will be the origin filename plus the groups or channels name. For ease of use you can call `reader.save(mode)` which is the equivalent to call `save` on every channel and group.
 ```python
 for group in reader.Groups:
     # plot the group (plots time and every channel on the y-axis)
@@ -59,10 +62,16 @@ for group in reader.Groups:
     group.save(mode='json')
 
 ``` 
+with the equivalent:
+```python
+reader.save(mode='json')
+``` 
 
 
 ## Release History
-### **Version 1.0.12**
+### **Version 1.0.14**
+* Output file-names updated
+### **Version 1.0.12/13**
 * Group channels with their time-channel into "groups"
 * Multiple plot modes:
     * Whole file
