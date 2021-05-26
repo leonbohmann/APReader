@@ -105,6 +105,14 @@ class APReader:
         for group in self.Groups:
             yield group
 
+
+    def saveplot(self, path = None):
+        if path == None:
+            path = os.path.dirname(self.filepath)
+
+        for thing in self:
+            thing.save(mode,path)
+
     def save(self, mode, path = None):
         """Save reader as text.
 
