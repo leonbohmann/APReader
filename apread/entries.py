@@ -334,7 +334,7 @@ class Group:
         self.interval = timeC[1]/1e3
         self.frequency = 1/timeC.data[1]
 
-    def plot(self, governed=False):
+    def plot(self, governed=False, save=False, path=''):
         """Plots this group of channels
 
         Args:
@@ -346,11 +346,20 @@ class Group:
         for channel in self.ChannelsY:
             channel.plot(mode='mat', governed=True)
 
-        if not governed:
+        if not governed and not save:
             plt.title(self.Name)
             plt.draw()
             plt.legend()
             plt.show()
+        elif save and path != '':
+            dest = os.path.join(path, self.fullName + f'.pdf')
+
+            # check if path present
+            if not os.path.exists(path):
+                os.makedirs(path)
+            plt.savefig(dest, format='pdf')
+        elif save:
+            print('Supply a path if you want the plot to be saved.')
 
     def __getitem__(self, key):
         """Return the time and all y-channels at index.
@@ -428,3 +437,4 @@ class Group:
             raise Exception(f"Unknown mode: {mode}")        
 
         return content
+
