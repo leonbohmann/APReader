@@ -38,14 +38,16 @@ class APReader:
     """
     Groups: List[Group]
 
-    def __init__(self, path, verbose=False):
+    def __init__(self, path, verbose=False, filterData=False):
         """Creates a new APReader based on a .binary file (path).
 
         Args:
             path (str): path to a catmanAP binary file.
             verbose (boolean): Show debug output.
+            filterData (boolean): Filter input data.
         """
         self.verbose = verbose
+        self.filterData = filterData
         self.filepath = path
         self.fileName = os.path.splitext(os.path.basename(path))[0]
         self.Channels = []
@@ -148,8 +150,8 @@ class APReader:
         elif mode == 'stack':
             fig,ax = plt.subplots(nChannels,1,sharex=True)
 
-        
-        fig.suptitle(self.fileName)
+        # add hint that data is filtered!
+        fig.suptitle(self.fileName + "(filtered)" if self.filterData else "")
         
         xUsed = False
         # plot all channels with their respective time-channels
@@ -236,8 +238,8 @@ class APReader:
             # loop channels
             for i in range(self.numChannels):
                 # create new channel on top of reader
-                # be careful with current stream position
-                channel = Channel(reader, self.fileName, self.verbose)
+                #! be careful with current stream position
+                channel = Channel(reader, self.fileName, self.verbose, self.filterData)
 
                 if not channel.broken and channel.length > 0:                    
                     self.Channels.append(channel)

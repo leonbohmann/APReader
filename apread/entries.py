@@ -11,8 +11,12 @@ import scipy.signal as sig
 # serialization
 import json
 
+# progress
 from tqdm import tqdm
 from apread.loader import Loader
+
+# filtering
+from scipy.signal import lfilter
 
 class Channel:
     """
@@ -25,16 +29,22 @@ class Channel:
             
             If there is more than one channel having the same amount of entries, every channel will 
             get the same reference to the time channel.
-    """    
-    
+    """        
+    data: list[float]
+    verbose: bool
+    # Defines if data should be filtered.
+    filterData: bool
 
-    def __init__(self, reader: BinaryReader, fileName='unknown', verbose=False):
+    def __init__(self, reader: BinaryReader, fileName='unknown', verbose=False, filterData=False):
         """
         Creates the Channel.
 
         Uses a reader (BinaryReader) to read the data from the file accessed by "APReader.__init__".
         """
+        # defines, if the apreader should output verbose debug messages
         self.verbose = verbose
+        # defines, wether read data should be filtered
+        self.filterData = filterData
 
         # referenced time channel (dummy, since this may stay None)
         self.Time = None
@@ -107,7 +117,19 @@ class Channel:
         self.data = []
         # read all channel data
         for i in tqdm(range(self.length), leave=False):
-            self.data.append(self.reader.read_double())                
+            self.data.append(self.reader.read_double())
+
+        # filter data
+        if self.filterData:
+            with Loader('Filtering data...'):
+                self.data = self.filter()
+
+    def filter(self, mode='lfilt'):
+        if mode == 'lfilt':
+            n = 50  # the larger n is, the smoother curve will be
+            b = [1.0 / n] * n
+            a = 1
+            return lfilter(b,a,self.data)
 
 
     def plot(self, mode = 'ply', governed = False):
