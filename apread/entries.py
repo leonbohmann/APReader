@@ -235,8 +235,7 @@ class Channel:
             
             data = {}
             data['X'] = self.Time.data
-            for j in range(length1):
-                data[f'Y'] = self.data
+            data['Y'] = self.data
             
             # output json
             with Loader(f'Create JSON: {self.Name}', end=f'\t☑ [ {self.fullName} → JSON ]' if self.verbose else ""):
