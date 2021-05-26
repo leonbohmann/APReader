@@ -4,6 +4,7 @@ from os import SEEK_SET
 from typing import List
 # import this to show warnings
 import warnings
+import random
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 
@@ -11,6 +12,20 @@ from tqdm import tqdm
 from apread.entries import Channel, Group
 # binary reader to read binary files
 from apread.binaryReader import BinaryReader
+
+def align_yaxis(ax1, v1, ax2, v2):
+    """adjust ax2 ylimit so that v2 in ax2 is aligned to v1 in ax1"""
+    _, y1 = ax1.transData.transform((0, v1))
+    _, y2 = ax2.transData.transform((0, v2))
+    inv = ax2.transData.inverted()
+    _, dy = inv.transform((0, 0)) - inv.transform((0, y1-y2))
+    miny, maxy = ax2.get_ylim()
+    ax2.set_ylim(miny+dy, maxy+dy)
+
+def get_cmap(n, name='hsv'):
+    '''Returns a function that maps each index in 0, 1, ..., n-1 to a distinct 
+    RGB color; the keyword argument name must be a standard mpl colormap name.'''
+    return plt.cm.get_cmap(name, n)
 
 class APReader:
     
@@ -106,12 +121,68 @@ class APReader:
             yield group
 
 
-    def saveplot(self, path = None):
+    def saveplot(self, path = None, mode='stack'):
+        """Saves a plot of the complete binary file.
+
+        Args:
+            path (str, optional): The path in which the plot should be saved. Defaults to None.
+            mode (str, optional): The plotting mode.
+                single     On top of each other.
+                stack     Stacked in subplots.
+        """
         if path == None:
             path = os.path.dirname(self.filepath)
 
-        for thing in self:
-            thing.save(mode,path)
+        # generate destination path
+        dest = os.path.join(path, self.fileName+ f'.pdf')
+        
+        nChannels = len([x for x in self.Channels if not x.isTime])
+        cmap = get_cmap(nChannels*10)
+
+        # create figure
+        c = 0
+        # plot channels in one figure
+        if mode == 'single':
+            fig, ax = plt.subplots()
+        # stack channels on top of each other
+        elif mode == 'stack':
+            fig,ax = plt.subplots(nChannels,1,sharex=True)
+
+        
+        fig.suptitle(self.fileName)
+        
+        xUsed = False
+        # plot all channels with their respective time-channels
+        for chan in self.Channels:
+            if not chan.isTime:   
+                # stack in subplots
+                if mode == 'stack':
+                    # get current axis from subplots
+                    ax1 = ax[c]
+                    ax1.set_ylabel(f'{chan.Name} [{chan.unit}]')                    
+                    ax1.plot(chan.Time.data, chan.data, color=cmap(c*10))
+                    c+=1      
+
+                    # label last x-axis
+                    if c >= nChannels:
+                        
+                        ax[-1].set_xlabel('Time [s]')
+
+                # other mode is single
+                elif xUsed:
+                    ax1 = ax.twinx()
+                    ax1.set_ylabel(f'{chan.Name} [{chan.unit}]')
+                    # align_yaxis(ax,0, ax1,0)
+                    ax1.plot(chan.Time.data, chan.data, color=cmap(c*10))
+                    c+=1
+                else:
+                    ax.set_ylabel(f'{chan.Name} [{chan.unit}]')
+                    ax.plot(chan.Time.data, chan.data, color=cmap(c*10))
+                    xUsed = True
+                    c+=1
+        
+        plt.draw()
+        plt.savefig(dest, format='pdf')
 
     def save(self, mode, path = None):
         """Save reader as text.
@@ -122,7 +193,7 @@ class APReader:
         """
         if path == None:
             path = os.path.dirname(self.filepath)
-
+        
         for thing in self:
             thing.save(mode,path)
 
