@@ -138,6 +138,10 @@ class APReader:
         # generate destination path
         dest = os.path.join(path, self.fileName+ f'.pdf')
         
+        # create path if not exist
+        if not os.path.exists(path):
+            os.makedirs(path)
+
         nChannels = len([x for x in self.Channels if not x.isTime])
         cmap = get_cmap(nChannels*10)
 
@@ -152,7 +156,7 @@ class APReader:
 
         # add hint that data is filtered!
         fig.suptitle(self.fileName + "(filtered)" if self.filterData else "")
-        
+        fig.set_size_inches(30/2.54, 20/2.54)
         xUsed = False
         # plot all channels with their respective time-channels
         for chan in self.Channels:
@@ -160,7 +164,11 @@ class APReader:
                 # stack in subplots
                 if mode == 'stack':
                     # get current axis from subplots
-                    ax1 = ax[c]
+                    #   if nChannels equals 1, there is only one axes
+                    if nChannels != 1:
+                        ax1 = ax[c]
+                    else:
+                        ax1 = ax
                     ax1.set_ylabel(f'{chan.Name} [{chan.unit}]')                    
                     ax1.plot(chan.Time.data, chan.data, color=cmap(c*10))
                     c+=1      
@@ -168,7 +176,7 @@ class APReader:
                     # label last x-axis
                     if c >= nChannels:
                         
-                        ax[-1].set_xlabel('Time [s]')
+                        ax1.set_xlabel('Time [s]')
 
                 # other mode is single
                 elif xUsed:
