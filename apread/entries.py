@@ -18,6 +18,9 @@ from apread.loader import Loader
 # filtering
 from scipy.signal import lfilter
 
+# typing
+from typing import List
+
 class Channel:
     """
     Holds data of a Catman Channel.    
@@ -30,7 +33,7 @@ class Channel:
             If there is more than one channel having the same amount of entries, every channel will 
             get the same reference to the time channel.
     """        
-    data: list[float]
+    data: List[float]
     verbose: bool
     # Defines if data should be filtered.
     filterData: bool
@@ -275,14 +278,14 @@ class Group:
     Helps calling plot functions..
     """
     # all (unsorted) channels in this group
-    Channels: list[Channel]
+    Channels: List[Channel]
     # Name of the time channel of this group
     Name: str
 
     # the time-channel
     ChannelX: Channel
     # all other data-channels
-    ChannelsY: list[Channel]
+    ChannelsY: List[Channel]
 
     # the data time interval with a fitting unit
     intervalstr: str
@@ -298,7 +301,7 @@ class Group:
 
 
 
-    def __init__(self, channels: list[Channel], fileName='unknown', verbose=False):
+    def __init__(self, channels: List[Channel], fileName='unknown', verbose=False):
         """Create group of channels.
 
         Args:
@@ -461,4 +464,3 @@ class Group:
             raise Exception(f"Unknown mode: {mode}")        
 
         return content
-
