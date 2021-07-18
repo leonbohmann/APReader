@@ -130,7 +130,7 @@ class APReader:
             path (str, optional): The path in which the plot should be saved. Defaults to None.
             mode (str, optional): The plotting mode.
                 single     On top of each other.
-                stack     Stacked in subplots.
+                stack      Stacked in subplots.
         """
         if path == None:
             path = os.path.dirname(self.filepath)
