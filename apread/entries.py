@@ -11,8 +11,15 @@ import scipy.signal as sig
 # serialization
 import json
 
+# progress
 from tqdm import tqdm
 from apread.loader import Loader
+
+# filtering
+from scipy.signal import lfilter
+
+# typing
+from typing import List
 
 class Channel:
     """
@@ -25,17 +32,22 @@ class Channel:
             
             If there is more than one channel having the same amount of entries, every channel will 
             get the same reference to the time channel.
-    """
-    
-    
+    """        
+    data: List[float]
+    verbose: bool
+    # Defines if data should be filtered.
+    filterData: bool
 
-    def __init__(self, reader: BinaryReader, fileName='unknown', verbose=False):
+    def __init__(self, reader: BinaryReader, fileName='unknown', verbose=False, filterData=False):
         """
         Creates the Channel.
 
         Uses a reader (BinaryReader) to read the data from the file accessed by "APReader.__init__".
         """
+        # defines, if the apreader should output verbose debug messages
         self.verbose = verbose
+        # defines, wether read data should be filtered
+        self.filterData = filterData
 
         # referenced time channel (dummy, since this may stay None)
         self.Time = None
@@ -108,7 +120,19 @@ class Channel:
         self.data = []
         # read all channel data
         for i in tqdm(range(self.length), leave=False):
-            self.data.append(self.reader.read_double())                
+            self.data.append(self.reader.read_double())
+
+        # filter data
+        if self.filterData:
+            with Loader('Filtering data...'):
+                self.data = self.filter()
+
+    def filter(self, mode='lfilt'):
+        if mode == 'lfilt':
+            n = 50  # the larger n is, the smoother curve will be
+            b = [1.0 / n] * n
+            a = 1
+            return lfilter(b,a,self.data)
 
 
     def plot(self, mode = 'ply', governed = False):
@@ -185,16 +209,12 @@ class Channel:
         """
         
         if self.isTime:
-         #   print('\t☐ Channel cant be saved since it is a Time-Channel')
+            if self.verbose: print('\tChannel cant be saved since it is a Time-Channel')
             return
 
-        if self.length == 0:
-         #   print('\t☐ Channel has no data and cant be saved.')
+        if self.length == 0 :
+            if self.verbose: print('\tChannel has no data and cant be saved.')
             return
-
-        # get total length
-        length = self.length
-        length1 = 1
 
         # ensure destination exists
         dest = os.path.join(path, self.fullName + '.json')
@@ -225,19 +245,13 @@ class Channel:
 
         # get total length
         length = self.length
-        length1 = 1
 
         content = ""
         # check, which mode to use as save
         if mode == 'csv':
             # write content to file
             for i in tqdm(range(length), desc=f'Create CSV: {self.Name}'):
-                content += (f'{self.Time.data[i]}')
-
-                for j in range(length1):
-                    content += (f'\t{self.data[i]}')
-
-                content += ('\n')
+                content += (f'{self.Time.data[i]}\t{self.data[i]}\n')
             if self.verbose:
                 print(f'\t☑ [ {self.fullName} → CSV ].')
 
@@ -246,8 +260,7 @@ class Channel:
             
             data = {}
             data['X'] = self.Time.data
-            for j in range(length1):
-                data[f'Y'] = self.data
+            data['Y'] = self.data
             
             # output json
             with Loader(f'Create JSON: {self.Name}', end=f'\t☑ [ {self.fullName} → JSON ]' if self.verbose else ""):
@@ -265,14 +278,14 @@ class Group:
     Helps calling plot functions..
     """
     # all (unsorted) channels in this group
-    Channels: list[Channel]
+    Channels: List[Channel]
     # Name of the time channel of this group
     Name: str
 
     # the time-channel
     ChannelX: Channel
     # all other data-channels
-    ChannelsY: list[Channel]
+    ChannelsY: List[Channel]
 
     # the data time interval with a fitting unit
     intervalstr: str
@@ -285,7 +298,10 @@ class Group:
     fileName: str
     # fully qualifying name
     fullName: str
-    def __init__(self, channels: list[Channel], fileName='unknown', verbose=False):
+
+
+
+    def __init__(self, channels: List[Channel], fileName='unknown', verbose=False):
         """Create group of channels.
 
         Args:
@@ -334,7 +350,7 @@ class Group:
         self.interval = timeC[1]/1e3
         self.frequency = 1/timeC.data[1]
 
-    def plot(self, governed=False, save=False, path=''):
+    def plot(self, governed=False):
         """Plots this group of channels
 
         Args:
@@ -346,20 +362,12 @@ class Group:
         for channel in self.ChannelsY:
             channel.plot(mode='mat', governed=True)
 
-        if not governed and not save:
+        if not governed:
             plt.title(self.Name)
             plt.draw()
             plt.legend()
             plt.show()
-        elif save and path != '':
-            dest = os.path.join(path, self.fullName + f'.pdf')
-
-            # check if path present
-            if not os.path.exists(path):
-                os.makedirs(path)
-            plt.savefig(dest, format='pdf')
-        elif save:
-            print('Supply a path if you want the plot to be saved.')
+        
 
     def __getitem__(self, key):
         """Return the time and all y-channels at index.
@@ -390,31 +398,46 @@ class Group:
         if not os.path.exists(path):
             os.makedirs(path)
 
+        # if there only is one channel, save only the channel
+        if len(self.ChannelsY) == 1:
+            self.ChannelsY[0].save(mode, path)
+            return
+
+        # otherwise get the formatted group
+        #  this will always have the time channel plus all y-channels
         content = self.getas(mode)
+        # write the content
         with open(dest, 'w') as file:
             file.write(content)
         
 
     def getas(self, mode):
-        """Save group as text.
+        """Format group as text.
 
         Args:
             mode (str): 'csv' or 'json'
             path (str): the destination directory(!) path
+
+        Returns:
+            A formatted string representing this group in the specified mode.
         """
         # get total length
         length = len(self.ChannelX.data)
-        length1 = len(self.ChannelsY)
+        # get length of y-channels
+        length_x = len(self.ChannelsY)
 
+        # start with empty content
         content = ""
 
         # check, which mode to use as save
         if mode == 'csv':
-            
+            # put every time-value-pair as row
             for i in tqdm(range(length), desc=f'Create CSV: {self.Name}'):
+                # start with time-channel
                 content += (f'{self.ChannelX.data[i]}')
 
-                for j in range(length1):
+                # use \t as delimiter
+                for j in range(length_x):
                     content += (f'\t{self.ChannelsY[j].data[i]}')
 
                 content += ('\n')
@@ -424,17 +447,20 @@ class Group:
 
         elif mode == 'json':
             # write content to file
+
+            # create dummy dictionary to save as json
             data = {}
             data['X'] = self.ChannelX.data
-            for j in range(length1):
+            # add y-data to dict
+            for j in range(length_x):
                 data[f'Y{j}'] = self.ChannelsY[j].data
             
             # output json
             with Loader(f'Create JSON: {self.Name}', end=f'\t☑ [ {self.fullName} → JSON ]' if self.verbose else ""):
+                # create json formatted string
                 content = json.dumps(data, indent=4)
 
         else:
             raise Exception(f"Unknown mode: {mode}")        
 
         return content
-

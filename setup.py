@@ -13,7 +13,7 @@ README = (HERE / "README.md").read_text()
 # This call to setup() does all the work
 setup(
     name="apread",
-    version="1.0.19",
+    version="1.0.20",
     description="Import data from CatmanAP binary files.",
     long_description=README,
     long_description_content_type="text/markdown",
@@ -23,9 +23,9 @@ setup(
     license="MIT",
     classifiers=[
         "License :: OSI Approved :: MIT License",
-        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.9.4",
     ],
     packages=['apread'],
-    install_requires=['matplotlib', 'plotly', 'scipy', 'typing', 'tqdm'],
+    install_requires=['matplotlib', 'plotly', 'scipy', 'typing', 'tqdm', 'pandas'],
     include_package_data=True,
 )
