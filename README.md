@@ -69,7 +69,9 @@ reader.save(mode='json')
 
 
 ## Release History
-### **Version 1.0.15/16**
+### **Version 1.0.20**
+* Switched to explicit type hinting with `typing` package (compatibility issues with python <3.9.x)  
+### Version 1.0.15/16
 * Fixed an issue with saving and non-existent directories
 * Added `getas` to generate formatted string without saving
 ### Version 1.0.14
