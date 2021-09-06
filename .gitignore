@@ -154,3 +154,34 @@ Thumbs.db
 
 
 # End of https://www.toptal.com/developers/gitignore/api/python
+test/test1.A_01.json
+test/test1.A_02.json
+test/test1.A_03.json
+test/test1.A_04.json
+test/test1.A_05.json
+test/test1.A_06.json
+test/test1.A_07.json
+test/test1.A_08.json
+test/test1.A_09.json
+test/test1.A_10.json
+test/test1.A_11.json
+test/test1.A_12.json
+test/test1.A_13.json
+test/test1.A_14.json
+test/test1.bin
+test/test1.F_01.json
+test/test1.F_02.json
+test/test1.F_03.json
+test/test1.F_04.json
+test/test1.S_09.json
+test/test1.S_10.json
+test/test1.Trigger.json
+test/test1.Zeit__2_-_Standardmessrate.json
+test/test2.bin
+test/test3.bin
+test/testing.py
+test/testinput.bin
+test/testinput.Kraftsensor_Hammer.json
+test/testinput.Schock_Sensor.json
+test/testinput.Zeit__1_-_Schnelle_Messrate.json
+test/testinput.Zeit__1_-_Standardmessrate.json
