@@ -69,7 +69,9 @@ reader.save(mode='json')
 
 
 ## Release History
-### **Version 1.0.20**
+### **Version 1.0.21**
+* Updated serialisation-procedures to always encode in `UTF-8`
+### Version 1.0.20
 * Switched to explicit type hinting with `typing` package (compatibility issues with python <3.9.x)  
 ### Version 1.0.15/16
 * Fixed an issue with saving and non-existent directories
