@@ -59,50 +59,49 @@ class Channel:
         self.num = reader.read_int16()
         # get length of channel
         self.length = reader.read_int32()
-        try:
-            # get name of channel
-            self.Name = reader.read_string(reader.read_int16())
+        # get name of channel
+        self.Name = reader.read_string(reader.read_int16())
 
-            # the original file name of the group
-            self.fileName = os.path.splitext(os.path.basename(fileName))[0]
-            tName = self.Name.replace(' ',"_")  # temporary name
-            self.fullName = f"{fileName}.{tName}"
+        # the original file name of the group
+        self.fileName = os.path.splitext(os.path.basename(fileName))[0]
+        tName = self.Name.replace(' ',"_")  # temporary name
+        self.fullName = f"{fileName}.{tName}"
 
-            # retrieve unit of channel                
-            self.unit = reader.read_string(reader.read_int16())
-            # get comment of channel                
-            self.comment = reader.read_string(reader.read_int16())
+        # retrieve unit of channel                
+        
+        self.unit = reader.read_string(reader.read_int16())
+        
+        # get comment of channel                
+        self.comment = reader.read_string(reader.read_int16())
 
-            # 0: numeric, 1: string, 2: binary object
-            self.format  = reader.read_int16()
-            # get format of channel (8: numeric, >8: string)
-            self.dw = reader.read_int16()
-            # time of reading
-            self.time = reader.read_double()
-            # extended channel header (mostly unused)
-            self.header = reader.read(reader.read_int32())
-            # linearization mode
-            self.lmode = reader.read_char()
-            # user scale
-            self.scale = reader.read_char()
-            # unknown points
-            self.npoi = reader.read_single()
-            # readaway
-            for i in range(self.npoi):
-                reader.read_double()
+        # 0: numeric, 1: string, 2: binary object
+        self.format  = reader.read_int16()
+        # get format of channel (8: numeric, >8: string)
+        self.dw = reader.read_int16()
+        # time of reading
+        self.time = reader.read_double()
+        # extended channel header (mostly unused)
+        self.header = reader.read(reader.read_int32())
+        # linearization mode
+        self.lmode = reader.read_char()
+        # user scale
+        self.scale = reader.read_char()
+        # unknown points
+        self.npoi = reader.read_single()
+        # readaway
+        for i in range(self.npoi):
+            reader.read_double()
 
-            # thermo type
-            reader.read_int16()
+        # thermo type
+        reader.read_int16()
 
-            # readaway
-            self.formula = reader.read_chars(reader.read_int16())
-            self.sensorInfo = reader.read_chars(reader.read_int32())
+        # readaway
+        self.formula = reader.read_string(reader.read_int16())
+        self.sensorInfo = reader.read_string(reader.read_int32())
 
-            # flag to indicate that everything is fine
-            self.broken = False
-        except:
-            # flag to indicate that there is something wrong
-            self.broken = True
+        # flag to indicate that everything is fine
+        self.broken = False
+        
 
 
     def readData(self):

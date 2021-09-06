@@ -28,16 +28,22 @@ class BinaryReader:
     def tell(self) -> int:
         return self.buf.tell()
 
-    def read_string(self, size: int = None, encoding: str = "ascii") -> str:
+    def read_string(self, size: int = None, encoding: str = "utf-8") -> str:
         if size == 0:
             return ""
 
         ret = struct.unpack(self.endian + "%is" %
                                 (size), self.read(size))[0]
 
-        return ret.decode(encoding)
+        try:            
+            return ret.decode(encoding)
+        except:
+            try:
+                return (b'\xc2' + ret).decode(encoding)
+            except:
+                return "unknown"
 
-    def read_chars(self, size, encoding: str = "ascii"):
+    def read_chars(self, size, encoding: str = "utf-8"):
         ret = b""
         for i in range(size):
             ret += struct.unpack(self.endian + "c", self.read(1))[0]
