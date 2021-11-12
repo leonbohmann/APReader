@@ -95,6 +95,12 @@ class APReader:
                     timeChannel = channel
                     # there is only one time-channel
                     break
+
+                # instead of assuming, ask the user if the timechannel is the one with "seconds"
+                if "s" == channel.unit:
+                    if input(f"Is '{channel.Name}' your time/reference channel? [y/n] ") == "y":
+                        timeChannel = channel
+                        break
             #%% sdasd
             # set the time-channel on every channel but itself
             if timeChannel != None:

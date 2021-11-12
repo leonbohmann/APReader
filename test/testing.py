@@ -3,7 +3,7 @@ import os
 
 # find current directory
 dirname = os.path.dirname(__file__)
-file = os.path.join(dirname, 'test1.bin')
+file = os.path.join(dirname, 'Example_Catman_Data.bin')
 
 outdir = os.path.join(dirname, 'output')
 

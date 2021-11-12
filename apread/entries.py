@@ -313,10 +313,11 @@ class Group:
         timeC = next((x for x in channels if x.isTime), None)
         self.ChannelX = timeC
 
-        if timeC is None and self.verbose:
+        if timeC is None:
             # if no time found, group cant be shown
-            print('\t[ APREAD/WARNING ] Group does not have a time-channel. Skipping...')
-        else:
+            if self.verbose:
+                print('\t[ APREAD/WARNING ] Group does not have a time-channel. Skipping...')
+        elif timeC is not None:
             # get name of time channel
             self.Name = timeC.Name
 
