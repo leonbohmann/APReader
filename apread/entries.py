@@ -152,9 +152,14 @@ class Channel:
                 print("\t[ APREAD/PLOT ] Channel is time. Not plotting.")
             return
 
+        if self.Time is None:
+            print("\t[ APREAD/PLOT ] Channel does not have time data. Not plotting.")
+            return
+
+        
         if self.verbose:
             print(f'\t[ APREAD/PLOT ] Filtering plot for {self.Name}')
-
+        
         # filter data
         datay = sig.wiener(self.data)
 
@@ -251,7 +256,7 @@ class Channel:
         if mode == 'csv':
             # write content to file
             for i in tqdm(range(length), desc=f'Create CSV: {self.Name}'):
-                content += (f'{self.Time.data[i]}\t{self.data[i]}\n')
+                content += (f'{self.Time.data[i] if self.Time is not None else ""}\t{self.data[i]}\n')
             if self.verbose:
                 print(f'\t☑ [ {self.fullName} → CSV ].')
 
@@ -259,7 +264,7 @@ class Channel:
             # write content to file
             
             data = {}
-            data['X'] = self.Time.data
+            if self.Time is not None: data['X'] = self.Time.data
             data['Y'] = self.data
             
             # output json
