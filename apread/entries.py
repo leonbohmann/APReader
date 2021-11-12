@@ -453,7 +453,8 @@ class Group:
 
             # create dummy dictionary to save as json
             data = {}
-            data['X'] = self.ChannelX.data
+            if self.ChannelX is not None:
+                data['X'] = self.ChannelX.data
             # add y-data to dict
             for j in range(length_x):
                 data[f'Y{j}'] = self.ChannelsY[j].data
