@@ -393,10 +393,7 @@ class Group:
             mode (str): 'csv' or 'json'
             path (str): the destination directory(!) path
         """
-        # get total length
-        length = len(self.ChannelX.data)
-        length1 = len(self.ChannelsY)
-
+        
         # ensure destination exists
         dest = os.path.join(path, self.fullName + f'.{mode}')
 
@@ -427,10 +424,10 @@ class Group:
         Returns:
             A formatted string representing this group in the specified mode.
         """
-        # get total length
-        length = len(self.ChannelX.data)
         # get length of y-channels
         length_x = len(self.ChannelsY)
+        # get total length
+        length = len(self.ChannelX.data) if self.ChannelX is not None else (len(self.ChannelsY[0]) if length_x > 0 else 0)
 
         # start with empty content
         content = ""
