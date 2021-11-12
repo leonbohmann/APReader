@@ -67,6 +67,9 @@ with the equivalent:
 reader.save(mode='json')
 ``` 
 
+## Examples
+Although not being a full example you can have a look into `testing.py` to get a glimpse of how to create a script using `apread`.
+
 
 ## Release History
 ### **Version 1.0.22**
