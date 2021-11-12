@@ -110,7 +110,7 @@ class APReader:
                         channel.isTime = False
                     else:
                         channel.isTime = True
-            elif self.verbose:                
+            else:
                 print("\t [ERROR] Channel-group does not contain a time-channel!")
                 print("\t  The current group will not be included in this output.")
                 continue
