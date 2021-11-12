@@ -75,6 +75,8 @@ Although not being a full example you can have a look into `testing.py` to get a
 ### **Version 1.0.22**
 * Fixed an issue with groups where time channels are not recognized
   *  now, user is prompted, when suspected time channel is found
+  *  plotting is not possible when there is no time-channel found
+  *  save groups and channels even when there is no time channel
 ### Version 1.0.21
 * Updated serialisation-procedures to always encode in `UTF-8`
 ### Version 1.0.20
