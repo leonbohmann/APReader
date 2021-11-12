@@ -110,9 +110,11 @@ class APReader:
                         channel.isTime = False
                     else:
                         channel.isTime = True
-            elif self.verbose:
-                print("\t [WARNING] Channel-group does not contain a time-channel")            
-
+            elif self.verbose:                
+                print("\t [ERROR] Channel-group does not contain a time-channel!")
+                print("\t  The current group will not be included in this output.")
+                continue
+            
             # create new group based on the groups listed
             self.Groups.append(Group(group, self.fileName, self.verbose))
         pass
