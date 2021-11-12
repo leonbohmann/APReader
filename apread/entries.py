@@ -147,8 +147,9 @@ class Channel:
             If False, a single figure will be shown.
         """
         # cant plot time over time
-        if self.isTime and self.verbose:
-            print("\t[ APREAD/PLOT ] Channel is time. Not plotting.")
+        if self.isTime:
+            if self.verbose:
+                print("\t[ APREAD/PLOT ] Channel is time. Not plotting.")
             return
 
         if self.verbose:
