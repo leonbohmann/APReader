@@ -1,7 +1,7 @@
 
 [![PyPi Upload](https://github.com/leonbohmann/APReader/actions/workflows/python-publish.yml/badge.svg)](https://github.com/leonbohmann/APReader/actions/workflows/python-publish.yml)
+![pyPI - Version](https://img.shields.io/pypi/v/apread?label=package%20version)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/apread?color=green&label=PyPi%20Downloads&style=plastic)
-
 
 # **apread** (Catman AP Reader)
 > Read binary files produced from catmanAP projects directly into python.
