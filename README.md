@@ -106,7 +106,7 @@ Although not being a full example you can have a look into `testing.py` to get a
 
 ## Meta
 
-Leon Bohmann – info@leonbohmann.de
+Leon Bohmann – mail@leonbohmann.de
 
 Distributed under the MIT license. See ``LICENSE`` for more information.
 
