@@ -185,7 +185,6 @@ test/testinput.Kraftsensor_Hammer.json
 test/testinput.Schock_Sensor.json
 test/testinput.Zeit__1_-_Schnelle_Messrate.json
 test/testinput.Zeit__1_-_Standardmessrate.json
-test/Example_Catman_Data.bin
 test/Example_Catman_Data.CH_1_4_2.json
 test/Example_Catman_Data.Diff_TE037.json
 test/Example_Catman_Data.Diff_TE096.json
