@@ -82,7 +82,7 @@ class Channel:
         # time of reading
         self.time = reader.read_double()
         # extended channel header
-        self.nHdrbytes = reader.read_int32()
+        self.nHdrBytes = reader.read_int32()
         self.extHeader = self.readExtHeader(reader)
         
         precDict = {0:8, 1:4, 2:2} # key: Attribute "Exportformat", value: precision in bytes
@@ -127,7 +127,8 @@ class Channel:
         the transcription window ahead by three bytes.
             
         """
-        
+        pos0 = rdr.tell()
+
         exthdr = {}
         exthdr['T0'] = rdr.read_double()
         exthdr['dt'] = rdr.read_double()
@@ -163,9 +164,25 @@ class Channel:
         
         exthdr['NominalRange'] = rdr.read_float()        
         exthdr['CLCFactor'] = rdr.read_float()
-        exthdr['Exportformat'] = rdr.read_byte()        
+        exthdr['ExportFormat'] = rdr.read_byte()        
         # reserve = rdr.read_string(10)
         reserve = rdr.read_string(7)
+        posN = rdr.tell()
+        
+        if (posN-pos0) != self.nHdrBytes:
+            print("""
+                  WARNING:
+                  The number of bytes read in the extended header of the channel
+                  '{}'
+                  doesn't match its declared length.
+                  This probably means that the hardcoded format definition in the method
+                  'entries.readExtHeader' is no longer valid and must be revised.
+                  Dumping the information already read from the extended header of this
+                  channel and carrying on reading the metadata.
+                  Precision will be set to double.
+                  """.format(self.Name))
+            rdr.seek(pos0 + self.nHdrBytes)
+            exthdr = {}
         
         return exthdr
 
