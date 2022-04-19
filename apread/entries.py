@@ -177,12 +177,11 @@ class Channel:
                   doesn't match its declared length.
                   This probably means that the hardcoded format definition in the method
                   'entries.readExtHeader' is no longer valid and must be revised.
-                  Dumping the information already read from the extended header of this
-                  channel and carrying on reading the metadata.
-                  Precision will be set to double.
+                  Leaving the extended header as-is and resetting the read position of
+                  the binary reader. Assuming double precision for the data.
                   """.format(self.Name))
             rdr.seek(pos0 + self.nHdrBytes)
-            exthdr = {}
+            exthdr['ExportFormat'] = 0
         
         return exthdr
 
