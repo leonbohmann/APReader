@@ -222,7 +222,7 @@ class Channel:
             return
 
         # ensure destination exists
-        dest = os.path.join(path, self.fullName + '.json')
+        dest = os.path.join(path, self.fullName + f'.{mode}')
 
         # check if the path exists and create if necessary
         if not os.path.exists(path):
