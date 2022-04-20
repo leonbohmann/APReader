@@ -116,57 +116,58 @@ class Channel:
         """
         Reads the extended header of this Channel.
 
-        NOTE: At the time of writing (April 14th 2022), there seems to be
-        an error in the format documentation, as given in the Catman
-        installation directory:
+        NOTE: The catman binary files use byte padding, which means that all
+        values are stored at byte addresses which are integer multiples of their
+        width in bytes (i.e. doubles are stored on addresses divisible by eight,
+        floats divisible by four etc.)
         
-        "C:\Program Files (x86)\HBM\catmanEasy\Infos\catmanBinaryFormat.xls"
+        See the link below for more info:        
+        https://stackoverflow.com/questions/4306186/structure-padding-and-packing
         
-        The error occurs somewhere between the attributes "HPFilt"
-        and "NominalRange". I've compensated for this error by moving
-        the transcription window ahead by three bytes.
+        For this reasen, I've added three bytes of padding before the attribute
+        'NominalRange', which is a float.
             
         """
-        pos0 = rdr.tell()
+        pos0 = rdr.tell() # In general not a multiple of eight, which is unexpected!
 
         exthdr = {}
-        exthdr['T0'] = rdr.read_double()
-        exthdr['dt'] = rdr.read_double()
-        exthdr['SensorType'] = rdr.read_int16()
-        exthdr['SupplyVoltage'] = rdr.read_int16()
+        exthdr['T0'] = rdr.read_double() # 8
+        exthdr['dt'] = rdr.read_double() # 16
+        exthdr['SensorType'] = rdr.read_int16() # 18
+        exthdr['SupplyVoltage'] = rdr.read_int16() # 20
         
-        exthdr['FiltChar'] = rdr.read_int16()
-        exthdr['FiltFreq'] = rdr.read_int16()
-        exthdr['TareVal'] = rdr.read_float()
-        exthdr['ZeroVal'] = rdr.read_float()        
-        exthdr['MeasRange'] = rdr.read_float()
-        exthdr['InChar'] = [rdr.read_float() for i in range(4)]
+        exthdr['FiltChar'] = rdr.read_int16() # 22
+        exthdr['FiltFreq'] = rdr.read_int16() # 24
+        exthdr['TareVal'] = rdr.read_float() # 28
+        exthdr['ZeroVal'] = rdr.read_float() # 32   
+        exthdr['MeasRange'] = rdr.read_float() # 36
+        exthdr['InChar'] = [rdr.read_float() for i in range(4)] # 40, 44, 48, 52
         
-        exthdr['SerNo'] = rdr.read_string(32)
-        exthdr['PhysUnit'] = rdr.read_string(8)
-        exthdr['NativeUnit'] = rdr.read_string(8)
+        exthdr['SerNo'] = rdr.read_string(32) # 84
+        exthdr['PhysUnit'] = rdr.read_string(8) # 92
+        exthdr['NativeUnit'] = rdr.read_string(8) # 100
         
-        exthdr['Slot'] = rdr.read_int16()
-        exthdr['SubSlot'] = rdr.read_int16()
-        exthdr['AmpType'] = rdr.read_int16()
-        exthdr['APType'] = rdr.read_int16()
-        exthdr['kFactor'] = rdr.read_float()
-        exthdr['bFactor'] = rdr.read_float()
+        exthdr['Slot'] = rdr.read_int16() # 102
+        exthdr['SubSlot'] = rdr.read_int16() # 104
+        exthdr['AmpType'] = rdr.read_int16() # 106
+        exthdr['APType'] = rdr.read_int16() # 108
+        exthdr['kFactor'] = rdr.read_float() # 112
+        exthdr['bFactor'] = rdr.read_float() # 116
         
-        exthdr['MeasSig'] = rdr.read_int16()
-        exthdr['AmpInput'] = rdr.read_int16()
-        exthdr['HPFilt'] = rdr.read_int16()        
-        exthdr['OLImportInfo'] = rdr.read_byte()
-        exthdr['ScaleType'] = rdr.read_byte()
-        exthdr['SoftwareTareVal'] = rdr.read_float()
-        reserve = rdr.read_string(3)
-        exthdr['WriteProtected'] = rdr.read_byte()    
+        exthdr['MeasSig'] = rdr.read_int16() # 118
+        exthdr['AmpInput'] = rdr.read_int16() # 120
+        exthdr['HPFilt'] = rdr.read_int16() # 122
+        exthdr['OLImportInfo'] = rdr.read_byte() # 123
+        exthdr['ScaleType'] = rdr.read_byte() # 124
+        exthdr['SoftwareTareVal'] = rdr.read_float() # 128        
+        exthdr['WriteProtected'] = rdr.read_byte() # 129
+        padding = rdr.read_string(3) # 132
         
-        exthdr['NominalRange'] = rdr.read_float()        
-        exthdr['CLCFactor'] = rdr.read_float()
-        exthdr['ExportFormat'] = rdr.read_byte()        
-        # reserve = rdr.read_string(10)
-        reserve = rdr.read_string(7)
+        exthdr['NominalRange'] = rdr.read_float() # 136 
+        exthdr['CLCFactor'] = rdr.read_float() # 140
+        exthdr['ExportFormat'] = rdr.read_byte() # 141
+        reserve = rdr.read_string(7) # 148
+        # reserve = rdr.read_string(10)        
         posN = rdr.tell()
         
         if (posN-pos0) != self.nHdrBytes:
