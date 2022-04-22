@@ -119,19 +119,19 @@ class Channel:
         NOTE: The catman binary files use byte padding, which means that all
         values are stored at byte addresses which are integer multiples of their
         width in bytes (i.e. doubles are stored on addresses divisible by eight,
-        floats divisible by four etc.)
+        floats on addresses divisible by four etc.)
         
         See the link below for more info:        
         https://stackoverflow.com/questions/4306186/structure-padding-and-packing
         
-        For this reasen, I've added three bytes of padding before the attribute
+        For this reason, I've added three bytes of padding before the attribute
         'NominalRange', which is a float.
             
         """
         pos0 = rdr.tell() # In general not a multiple of eight, which is unexpected!
 
         exthdr = {}
-        exthdr['T0'] = rdr.read_double() # 8
+        exthdr['T0'] = rdr.read_double() # (pos0+) 8
         exthdr['dt'] = rdr.read_double() # 16
         exthdr['SensorType'] = rdr.read_int16() # 18
         exthdr['SupplyVoltage'] = rdr.read_int16() # 20
@@ -177,7 +177,7 @@ class Channel:
                   '{}'
                   doesn't match its declared length.
                   This probably means that the hardcoded format definition in the method
-                  'entries.readExtHeader' is no longer valid and must be revised.
+                  'Channel.readExtHeader' is no longer valid and must be revised.
                   Leaving the extended header as-is and resetting the read position of
                   the binary reader. Assuming double precision for the data.
                   """.format(self.Name))
