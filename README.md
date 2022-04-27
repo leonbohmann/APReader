@@ -74,7 +74,7 @@ Although not being a full example you can have a look into `testing.py` to get a
 
 
 ## Release History
-### **Version 1.0.23** (taken from #13 from @hakonbar)
+### **Version 1.0.23** (taken from https://github.com/leonbohmann/APReader/pull/13 from @hakonbar)
 * Added a 'fastload' mode, which takes advantage of the fact that consecutive data points in a measurement channel are stored as a contiguous "byte chunk" in the catman binary format instead of blockwise. You therefore only need to pass a pointer to the first byte as well as the length of the chunk.
 * Added the method "Channel.readExtHeader", in order to get at the attribute "ExportFormat". This attribute indicates the byte depth or precision of the measurement file, allowing the algorithm to differentiate.
 * Added the method "BinaryReader.read_float", which reads in 4-byte floating point numbers.
@@ -103,11 +103,11 @@ Although not being a full example you can have a look into `testing.py` to get a
     * json
     * csv
 
-### *Version 1.0.11*
+### Version 1.0.11
 * Progressbars indicate read-progress of files
 * Multiple plot modes
 
-### *Version 1.0.0*
+### Version 1.0.0
 * Convert catman files to channels
 
 ## Meta
