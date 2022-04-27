@@ -14,7 +14,7 @@ import json
 # progress
 from tqdm import tqdm
 from apread.loader import Loader
-
+import numpy as np
 # filtering
 from scipy.signal import lfilter
 
@@ -33,17 +33,18 @@ class Channel:
             If there is more than one channel having the same amount of entries, every channel will 
             get the same reference to the time channel.
     """        
-    data: List[float]
+    # data: List[float]
     verbose: bool
     # Defines if data should be filtered.
     filterData: bool
 
-    def __init__(self, reader: BinaryReader, fileName='unknown', verbose=False, filterData=False):
+    def __init__(self, reader: BinaryReader, fileName='unknown', verbose=False, filterData=False, fastload=True):
         """
         Creates the Channel.
 
         Uses a reader (BinaryReader) to read the data from the file accessed by "APReader.__init__".
         """
+        self.fastload = fastload
         # defines, if the apreader should output verbose debug messages
         self.verbose = verbose
         # defines, wether read data should be filtered
@@ -80,14 +81,23 @@ class Channel:
         self.dw = reader.read_int16()
         # time of reading
         self.time = reader.read_double()
-        # extended channel header (mostly unused)
-        self.header = reader.read(reader.read_int32())
+        # extended channel header
+        self.nHdrBytes = reader.read_int32()
+        self.extHeader = self.readExtHeader(reader)
+        
+        precDict = {0:8, 1:4, 2:2} # key: Attribute "Exportformat", value: precision in bytes
+        try:
+            self.precision = precDict[self.extHeader['ExportFormat']]
+        except KeyError:
+            print('Unexpected value of attribute "ExportFormat" in the extended header of channel {}. Assuming double precision.'.format(self.Name))
+            self.precision = 8
+
         # linearization mode
         self.lmode = reader.read_char()
         # user scale
         self.scale = reader.read_char()
         # unknown points
-        self.npoi = reader.read_single()
+        self.npoi = reader.read_byte()
         # readaway
         for i in range(self.npoi):
             reader.read_double()
@@ -101,8 +111,80 @@ class Channel:
 
         # flag to indicate that everything is fine
         self.broken = False
-        
 
+    def readExtHeader(self, rdr: BinaryReader):
+        """
+        Reads the extended header of this Channel.
+
+        NOTE: The catman binary files use byte padding, which means that all
+        values are stored at byte addresses which are integer multiples of their
+        width in bytes (i.e. doubles are stored on addresses divisible by eight,
+        floats on addresses divisible by four etc.)
+        
+        See the link below for more info:        
+        https://stackoverflow.com/questions/4306186/structure-padding-and-packing
+        
+        For this reason, I've added three bytes of padding before the attribute
+        'NominalRange', which is a float.
+            
+        """
+        pos0 = rdr.tell() # In general not a multiple of eight, which is unexpected!
+
+        exthdr = {}
+        exthdr['T0'] = rdr.read_double() # (pos0+) 8
+        exthdr['dt'] = rdr.read_double() # 16
+        exthdr['SensorType'] = rdr.read_int16() # 18
+        exthdr['SupplyVoltage'] = rdr.read_int16() # 20
+        
+        exthdr['FiltChar'] = rdr.read_int16() # 22
+        exthdr['FiltFreq'] = rdr.read_int16() # 24
+        exthdr['TareVal'] = rdr.read_float() # 28
+        exthdr['ZeroVal'] = rdr.read_float() # 32   
+        exthdr['MeasRange'] = rdr.read_float() # 36
+        exthdr['InChar'] = [rdr.read_float() for i in range(4)] # 40, 44, 48, 52
+        
+        exthdr['SerNo'] = rdr.read_string(32) # 84
+        exthdr['PhysUnit'] = rdr.read_string(8) # 92
+        exthdr['NativeUnit'] = rdr.read_string(8) # 100
+        
+        exthdr['Slot'] = rdr.read_int16() # 102
+        exthdr['SubSlot'] = rdr.read_int16() # 104
+        exthdr['AmpType'] = rdr.read_int16() # 106
+        exthdr['APType'] = rdr.read_int16() # 108
+        exthdr['kFactor'] = rdr.read_float() # 112
+        exthdr['bFactor'] = rdr.read_float() # 116
+        
+        exthdr['MeasSig'] = rdr.read_int16() # 118
+        exthdr['AmpInput'] = rdr.read_int16() # 120
+        exthdr['HPFilt'] = rdr.read_int16() # 122
+        exthdr['OLImportInfo'] = rdr.read_byte() # 123
+        exthdr['ScaleType'] = rdr.read_byte() # 124
+        exthdr['SoftwareTareVal'] = rdr.read_float() # 128        
+        exthdr['WriteProtected'] = rdr.read_byte() # 129
+        padding = rdr.read_string(3) # 132
+        
+        exthdr['NominalRange'] = rdr.read_float() # 136 
+        exthdr['CLCFactor'] = rdr.read_float() # 140
+        exthdr['ExportFormat'] = rdr.read_byte() # 141
+        reserve = rdr.read_string(7) # 148
+        # reserve = rdr.read_string(10)        
+        posN = rdr.tell()
+        
+        if (posN-pos0) != self.nHdrBytes:
+            print("""
+                  WARNING:
+                  The number of bytes read in the extended header of the channel
+                  '{}'
+                  doesn't match its declared length.
+                  This probably means that the hardcoded format definition in the method
+                  'Channel.readExtHeader' is no longer valid and must be revised.
+                  Leaving the extended header as-is and resetting the read position of
+                  the binary reader. Assuming double precision for the data.
+                  """.format(self.Name))
+            rdr.seek(pos0 + self.nHdrBytes)
+            exthdr['ExportFormat'] = 0
+        
+        return exthdr
 
     def readData(self):
         """
@@ -114,12 +196,34 @@ class Channel:
         # if something was wrong previously, nothing will happen here
         if self.broken:
             return
+        
+        if self.fastload:
+            # The data is stored channelwise. We therefore only need to pass pointers to the first and last byte.
+            if self.precision == 8 or self.precision == 4:
+                self.data = np.fromfile(self.reader.buf, dtype=np.dtype('f{}'.format(self.precision)), count=self.length)
+            elif self.precision == 2:
+                MinValue = self.reader.read_double()
+                MaxValue = self.reader.read_double()
+                sf = (MaxValue - MinValue)/32767 # scale factor
+                self.data = np.fromfile(self.reader.buf, dtype=np.dtype('u2'), count=self.length)*sf + MinValue
+        else:
+            # initialize data
+            self.data = []
 
-        # initialize data
-        self.data = []
-        # read all channel data
-        for i in tqdm(range(self.length), leave=False):
-            self.data.append(self.reader.read_double())
+            # read all channel data            
+            if self.precision == 8:
+                for i in tqdm(range(self.length), leave=False):
+                    self.data.append(self.reader.read_double())
+            elif self.precision == 4:
+                for i in tqdm(range(self.length), leave=False):
+                    self.data.append(self.reader.read_float())
+            elif self.precision == 2:                
+                MinValue = self.reader.read_double()
+                MaxValue = self.reader.read_double()
+                sf = (MaxValue - MinValue)/32767 # scale factor
+                
+                for i in tqdm(range(self.length), leave=False):
+                    self.data.append(self.reader.read_int16()*sf + MinValue)
 
         # filter data
         if self.filterData:
