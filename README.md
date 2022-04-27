@@ -74,11 +74,17 @@ Although not being a full example you can have a look into `testing.py` to get a
 
 
 ## Release History
-### **Version 1.0.22**
+### **Version 1.0.23** (taken from #13 from @hakonbar)
+* Added a 'fastload' mode, which takes advantage of the fact that consecutive data points in a measurement channel are stored as a contiguous "byte chunk" in the catman binary format instead of blockwise. You therefore only need to pass a pointer to the first byte as well as the length of the chunk.
+* Added the method "Channel.readExtHeader", in order to get at the attribute "ExportFormat". This attribute indicates the byte depth or precision of the measurement file, allowing the algorithm to differentiate.
+* Added the method "BinaryReader.read_float", which reads in 4-byte floating point numbers.
+* Changed the name of the method "read_single" to "read_byte" to avoid confusion with the newly added method.
+* Added some sample data from HBK with 2-, 4- and 8-byte data.
+### Version 1.0.22
 * Fixed an issue with groups where time channels are not recognized
-  *  now, user is prompted, when suspected time channel is found
-  *  plotting is not possible when there is no time-channel found
-  *  save groups and channels even when there is no time channel
+*  now, user is prompted, when suspected time channel is found
+*  plotting is not possible when there is no time-channel found
+*  save groups and channels even when there is no time channel
 ### Version 1.0.21
 * Updated serialisation-procedures to always encode in `UTF-8`
 ### Version 1.0.20
