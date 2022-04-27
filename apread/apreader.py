@@ -38,7 +38,7 @@ class APReader:
     """
     Groups: List[Group]
 
-    def __init__(self, path, verbose=False, filterData=False, fastload=False):
+    def __init__(self, path, verbose=False, filterData=False, fastload=True):
         """Creates a new APReader based on a .binary file (path).
 
         Args:

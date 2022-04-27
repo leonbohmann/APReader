@@ -38,7 +38,7 @@ class Channel:
     # Defines if data should be filtered.
     filterData: bool
 
-    def __init__(self, reader: BinaryReader, fileName='unknown', verbose=False, filterData=False, fastload=False):
+    def __init__(self, reader: BinaryReader, fileName='unknown', verbose=False, filterData=False, fastload=True):
         """
         Creates the Channel.
 
