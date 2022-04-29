@@ -265,12 +265,12 @@ class Channel:
             print(f'\t[ APREAD/PLOT ] Filtering plot for {self.Name}')
         
         # filter data
-        datay = sig.wiener(self.data)
+        #datay = sig.wiener(self.data)
 
         if self.verbose:
             print(f'\t[ APREAD/PLOT ] Plotting {self.Name}')
         if 'ply' in mode:
-            fig = px.line(x = self.Time.data, y = datay, title = f'{self.Name}')
+            fig = px.line(x = self.Time.data, y = self.data, title = f'{self.Name}')
             if not governed:
                 fig.show()
             else:
@@ -282,7 +282,7 @@ class Channel:
                 plt.xlabel('Time [s]')
                 plt.ylabel(self.unit)
 
-            plt.plot(self.Time.data, datay, label=self.Name)
+            plt.plot(self.Time.data, self.data, label=self.Name)
 
             if not governed:
                 plt.title(self.Name)
@@ -387,14 +387,17 @@ class Group:
     Helps calling plot functions..
     """
     # all (unsorted) channels in this group
-    Channels: List[Channel]
+    Channels: List[Channel] 
+    """List of all channels"""
     # Name of the time channel of this group
     Name: str
 
     # the time-channel
     ChannelX: Channel
+    """Time channel only."""
     # all other data-channels
     ChannelsY: List[Channel]
+    """Data channels only."""
 
     # the data time interval with a fitting unit
     intervalstr: str
