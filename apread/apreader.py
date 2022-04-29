@@ -7,6 +7,7 @@ import warnings
 import random
 from matplotlib import pyplot as plt
 from tqdm import tqdm
+import re
 
 # channel definition
 from apread.entries import Channel, Group
@@ -92,7 +93,7 @@ class APReader:
             timeChannel = None            
             for channel in group:
                 # condition: channel name has to contain "Zeit"
-                if str.upper("Zeit") in str.upper(channel.Name) or str.upper("Time") in str.upper(channel.Name):
+                if re.match(r"([T|t]ime)|([Z|z]eit)",channel.Name) is not None:
                     timeChannel = channel
                     # there is only one time-channel
                     break
