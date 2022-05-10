@@ -21,6 +21,12 @@ from scipy.signal import lfilter
 # typing
 from typing import List
 
+
+def get_clr(n, name='hsv'):
+    '''Returns a function that maps each index in 0, 1, ..., n-1 to a distinct 
+    RGB color; the keyword argument name must be a standard mpl colormap name.'''
+    return plt.cm.get_cmap(name, n)
+
 class Channel:
     """
     Holds data of a Catman Channel.    
@@ -238,7 +244,7 @@ class Channel:
             return lfilter(b,a,self.data)
 
 
-    def plot(self, mode = 'ply', governed = False):
+    def plot(self, mode = 'ply', governed = False, axes=None, clr='b-'):
         """
         Plot the channel over its connected time-channel.
 
@@ -261,12 +267,15 @@ class Channel:
             return
 
         
-        if self.verbose:
-            print(f'\t[ APREAD/PLOT ] Filtering plot for {self.Name}')
-        
         # filter data
+        # if self.verbose:
+        #     print(f'\t[ APREAD/PLOT ] Filtering plot for {self.Name}')
+        
         #datay = sig.wiener(self.data)
 
+        plotbase = axes if axes is not None else plt
+        
+        
         if self.verbose:
             print(f'\t[ APREAD/PLOT ] Plotting {self.Name}')
         if 'ply' in mode:
@@ -282,13 +291,16 @@ class Channel:
                 plt.xlabel('Time [s]')
                 plt.ylabel(self.unit)
 
-            plt.plot(self.Time.data, self.data, label=self.Name)
-
+            line = plotbase.plot(self.Time.data, self.data, color=clr, label=self.Name )
+            
+            
             if not governed:
                 plt.title(self.Name)
                 plt.draw()
                 plt.legend()        
                 plt.show()
+                
+            return line
 
     def __str__(self):
         """
@@ -469,12 +481,29 @@ class Group:
         Args:
             governed (bool, optional): States wether this plot-function is called from another plot-function. When nesting plot functions, the base function has to call plt.show. Defaults to False.
         """
-        if not governed:
-            fig = plt.figure(self.Name)
+        fig, ax1 = plt.subplots()
+            
+        ax1.set_xlabel(self.ChannelX.unit)
+        
+        cmap = get_clr(len(self.ChannelsY)+1)
+        lns = []
+        
+        axis = ax1
+        for i,channel in enumerate(self.ChannelsY):
+            if i > 0:
+                axis = ax1.twinx()            
+            axis.set_ylabel(channel.unit)
+            
+            axis.tick_params(axis='y', colors=cmap(i))
+            axis.get_yaxis().label.set_color(cmap(i))  
+                      
+            chanLine = channel.plot(mode='mat', governed=True, clr=cmap(i))
+            lns += chanLine
 
-        for channel in self.ChannelsY:
-            channel.plot(mode='mat', governed=True)
-
+        labs = [l.get_label() for l in lns]
+        ax1.legend(lns, labs, loc=0)
+        ax1.grid()
+        
         if not governed:
             plt.title(self.Name)
             plt.draw()

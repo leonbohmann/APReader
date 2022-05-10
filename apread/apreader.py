@@ -283,12 +283,8 @@ class APReader:
         """Plots the complete file.
         """
         name = os.path.basename(self.filepath)
-        fig = plt.figure(name)
+        
 
         for group in self.Groups:
             group.plot(governed=True)
-
-        plt.draw()
-        plt.title(name)
-        plt.legend()
-        plt.show()
+        
