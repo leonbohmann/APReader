@@ -306,9 +306,12 @@ class Channel:
         """
         Default conversion to string.
         """
-        print(self.Name)
+        chan = ""
+        chan += (self.Name) + "\n"
         for d in self.data:
-            print(d)
+            chan += str(d) + "\n"
+            
+        return chan
 
     def __getitem__(self, key) -> float:
         """Return the item at index key.
@@ -383,6 +386,9 @@ class Channel:
             if self.Time is not None: data['X'] = self.Time.data
             data['Y'] = self.data
             
+            
+            
+            #TODO: this will fail when fastload is active and data is ndarray...            
             # output json
             with Loader(f'Create JSON: {self.Name}', end=f'\t☑ [ {self.fullName} → JSON ]' if self.verbose else ""):
                 content = json.dumps(data, indent=4)
