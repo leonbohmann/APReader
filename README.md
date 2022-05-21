@@ -72,14 +72,19 @@ reader.save(mode='json')
 ## Examples
 Although not being a full example you can have a look into `testing.py` to get a glimpse of how to create a script using `apread`.
 
-
 ## Release History
-### **Version 1.0.23** (taken from https://github.com/leonbohmann/APReader/pull/13 from @hakonbar)
+### **Version 1.1** (taken from https://github.com/leonbohmann/APReader/pull/13 from @hakonbar)
+#### Breaking changes
+* Removed post-processing functions, this will be up to the user
+    Since these function change a lot based on current needs, I decided to remove the post-processing functionality completely. The user now needs to do the post-processing on his own, meaning the creation of plots using time and data channels...
+
+#### Changes
 * Added a 'fastload' mode, which takes advantage of the fact that consecutive data points in a measurement channel are stored as a contiguous "byte chunk" in the catman binary format instead of blockwise. You therefore only need to pass a pointer to the first byte as well as the length of the chunk.
 * Added the method "Channel.readExtHeader", in order to get at the attribute "ExportFormat". This attribute indicates the byte depth or precision of the measurement file, allowing the algorithm to differentiate.
 * Added the method "BinaryReader.read_float", which reads in 4-byte floating point numbers.
 * Changed the name of the method "read_single" to "read_byte" to avoid confusion with the newly added method.
 * Added some sample data from HBK with 2-, 4- and 8-byte data.
+
 ### Version 1.0.22
 * Fixed an issue with groups where time channels are not recognized
 *  now, user is prompted, when suspected time channel is found
