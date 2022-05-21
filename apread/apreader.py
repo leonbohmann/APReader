@@ -13,6 +13,7 @@ import re
 from apread.entries import Channel, Group
 # binary reader to read binary files
 from apread.binaryReader import BinaryReader
+from apread.tools import deprecated
 
 def align_yaxis(ax1, v1, ax2, v2):
     """adjust ax2 ylimit so that v2 in ax2 is aligned to v1 in ax1"""
@@ -132,91 +133,6 @@ class APReader:
         for group in self.Groups:
             yield group
 
-
-    def saveplot(self, path = None, mode='stack'):
-        """Saves a plot of the complete binary file.
-
-        Args:
-            path (str, optional): The path in which the plot should be saved. Defaults to None.
-            mode (str, optional): The plotting mode.
-                single     On top of each other.
-                stack      Stacked in subplots.
-        """
-        if path == None:
-            path = os.path.dirname(self.filepath)
-
-        # generate destination path
-        dest = os.path.join(path, self.fileName+ f'.pdf')
-        
-        # create path if not exist
-        if not os.path.exists(path):
-            os.makedirs(path)
-
-        nChannels = len([x for x in self.Channels if not x.isTime])
-        cmap = get_cmap(nChannels*10)
-
-        # create figure
-        c = 0
-        # plot channels in one figure
-        if mode == 'single':
-            fig, ax = plt.subplots()
-        # stack channels on top of each other
-        elif mode == 'stack':
-            fig,ax = plt.subplots(nChannels,1,sharex=True)
-
-        # add hint that data is filtered!
-        fig.suptitle(self.fileName + "(filtered)" if self.filterData else "")
-        fig.set_size_inches(30/2.54, 20/2.54)
-        xUsed = False
-        # plot all channels with their respective time-channels
-        for chan in self.Channels:
-            if not chan.isTime:   
-                # stack in subplots
-                if mode == 'stack':
-                    # get current axis from subplots
-                    #   if nChannels equals 1, there is only one axes
-                    if nChannels != 1:
-                        ax1 = ax[c]
-                    else:
-                        ax1 = ax
-                    ax1.set_ylabel(f'{chan.Name} [{chan.unit}]')                    
-                    ax1.plot(chan.Time.data, chan.data, color=cmap(c*10))
-                    c+=1      
-
-                    # label last x-axis
-                    if c >= nChannels:
-                        
-                        ax1.set_xlabel('Time [s]')
-
-                # other mode is single
-                elif xUsed:
-                    ax1 = ax.twinx()
-                    ax1.set_ylabel(f'{chan.Name} [{chan.unit}]')
-                    # align_yaxis(ax,0, ax1,0)
-                    ax1.plot(chan.Time.data, chan.data, color=cmap(c*10))
-                    c+=1
-                else:
-                    ax.set_ylabel(f'{chan.Name} [{chan.unit}]')
-                    ax.plot(chan.Time.data, chan.data, color=cmap(c*10))
-                    xUsed = True
-                    c+=1
-        
-        plt.draw()
-        plt.savefig(dest, format='pdf')
-
-    def save(self, mode, path = None):
-        """Save reader as text.
-
-        Args:
-            mode (str): 'csv' or 'json'
-            path (str): the destination directory(!) path
-        """
-        if path == None:
-            path = os.path.dirname(self.filepath)
-        
-        for thing in self:
-            thing.save(mode,path)
-
     def read(self):
         """
         Read the binary file.
@@ -275,16 +191,4 @@ class APReader:
                 channel.readData()
 
             if self.verbose:
-                print(f'\t[ {self.fileName} ] Done. {len(self.Channels)} Channels left after filtering.')
-
-                    
-            
-    def plot(self):
-        """Plots the complete file.
-        """
-        name = os.path.basename(self.filepath)
-        
-
-        for group in self.Groups:
-            group.plot(governed=True)
-        
+                print(f'\t[ {self.fileName} ] Done. {len(self.Channels)} Channels left after filtering.')                               

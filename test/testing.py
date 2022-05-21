@@ -10,24 +10,15 @@ outdir = os.path.join(dirname, 'output')
 # create a reader
 reader = APReader(file)
 
-# plot every channel
-#for channel in reader.Channels:
-#    channel.plot('mat')
+## print all single channels
+#for channel in reader.Channels:    
+#    print (f"{channel.Name}: {len(channel.data)} Entries")
 
-# plot every group
-# for group in reader.Groups:
-#     group.plot()
-
-#reader.plot()
-
-# save all entries as json
-reader.save('json')
-
-# # specify output directory
-# reader.save('json', outdir)
-
-# # equivalent to the one before
-for channel in reader.Channels:
-    print (channel.getas('json'))
 for group in reader.Groups:
-    print (group.getas('json'))
+    print("--------------")
+    print (f"Group ({group.ChannelX.Name})")
+    
+    for channel in group.Channels:
+        print (f"\t{channel.Name:20}: {len(channel.data)} Entries")        
+
+    print("--------------")
