@@ -92,40 +92,76 @@ reader.plotGroup(0)           # specific group
 reader.plotGroups(0,3)        # group 1 to 3 (1,2,3)
 reader.plot([0, 2, 4])        # group 1, 3 and 5
 ``` 
+### External Header
+Thanks to ([hakonbars PR13](https://github.com/leonbohmann/APReader/pull/13)) you are now able to access external header information using `channel.exthdr`, a dicitionary containing all keys as described in [this sheet](https://github.com/leonbohmann/APReader/blob/dev-2/test/catmanBinaryFormat.xls).
+
+```python
+['T0']				   # ACQ timestamp info (NOW format)
+['dt']                 # ACQ delta t in ms
+['SensorType']         # IDS code of sensor type
+['SupplyVoltage']      # IDS code supply voltage
+['FiltChar']           # IDS code of filter characteristics
+['FiltFreq']           # IDS code of filter frequency
+['TareVal']            # Current value in tare buffer
+['ZeroVal']            # Current value in zero adjustment buffer
+['MeasRange']          # IDS code of measuring range
+['InChar']             # Input characteristics (0=x1,1=y1,2=x2,3=y2)
+['SerNo']              # Amplifier serial number
+['PhysUnit']           # Physical unit (if user scaling in effect, this is the user unit!)
+['NativeUnit']         # Native unit
+['Slot']               # Hardware slot number
+['SubSlot']            # Sub-channel, 0 if single channel slot
+['AmpType']            # IDS code of amplifier type
+['APType']             # IDS code of AP connector type (MGCplus only)
+['kFactor']            # Gage factor used in strain gage measurements
+['bFactor']            # Bridge factor used in strain gage measurements
+['MeasSig']            # IDS code of measurement signal (e.g. GROSS, NET) (MGCplus only)
+['AmpInput']           # IDS code of amplifier input (ZERO,CAL,MEAS)
+['HPFilt']             # IDS code of highpass filter
+['OLImportInfo']       # Special information used in online export file headers
+['ScaleType']          # 0=Engineering units, 1=Electrical
+['SoftwareTareVal']    # Software tare (zero) for channels carrying a user scale
+['WriteProtected']     # If true, write access is denied
+['NominalRange']       # CAV value
+['CLCFactor']          # Cable length compensation factor (CANHEAD only)
+['ExportFormat']       # 0=8-Byte Double, 1=4-Byte Single, 2=2-Byte Integer (FOR CATMAN BINARY EXPORT ONLY!)    
+```
+
+
+
 
 ## Release History
 ### **Version 1.1**
 
 #### Breaking changes
 
-* Removed post-processing functions, this will be up to the user
+* Removed saving functions, this will be up to the user
     > Since these function change a lot based on current needs, I decided to remove the post-processing functionality completely. The user now needs to do the post-processing on his own, meaning the creation of plots using time and data channels...
 
 #### Changes
-* ([hakonbar](https://github.com/leonbohmann/APReader/pull/13)) Added a 'fastload' mode, which takes advantage of the fact that consecutive data points in a measurement channel are stored as a contiguous "byte chunk" in the catman binary format instead of blockwise. You therefore only need to pass a pointer to the first byte as well as the length of the chunk.
-* ([hakonbar](https://github.com/leonbohmann/APReader/pull/13)) Added the method "Channel.readExtHeader", in order to get at the attribute "ExportFormat". This attribute indicates the byte depth or precision of the measurement file, allowing the algorithm to differentiate.
-* ([hakonbar](https://github.com/leonbohmann/APReader/pull/13)) Added the method "BinaryReader.read_float", which reads in 4-byte floating point numbers.
-* ([hakonbar](https://github.com/leonbohmann/APReader/pull/13)) Changed the name of the method "read_single" to "read_byte" to avoid confusion with the newly added method.
-* ([hakonbar](https://github.com/leonbohmann/APReader/pull/13)) Added some sample data from HBK with 2-, 4- and 8-byte data.
+* ([hakonbar PR13](https://github.com/leonbohmann/APReader/pull/13)) Differentiate floating point precision
+* ([hakonbar PR13](https://github.com/leonbohmann/APReader/pull/13)) Reading additional header information
 * Fixed null returning string conversion function
 * Using regex to find time channels
+* Improved plotting with multiple axes
+* Printing channels and groups will now give a summary instead of all data
 
 
-### Version 1.0.22
+#### Version 1.0.22
 * Fixed an issue with groups where time channels are not recognized
 *  now, user is prompted, when suspected time channel is found
 *  plotting is not possible when there is no time-channel found
 *  save groups and channels even when there is no time channel
-### Version 1.0.21
+#### Version 1.0.21
 * Updated serialisation-procedures to always encode in `UTF-8`
-### Version 1.0.20
+#### Version 1.0.20
 * Switched to explicit type hinting with `typing` package (compatibility issues with python <3.9.x)  
-### Version 1.0.15/16
+#### Version 1.0.15/16
 * Fixed an issue with saving and non-existent directories
 * Added `getas` to generate formatted string without saving
-### Version 1.0.14
+#### Version 1.0.14
 * Output file-names updated
-### Version 1.0.12/13
+#### Version 1.0.12/13
 * Group channels with their time-channel into "groups"
 * Multiple plot modes:
     * Whole file
@@ -134,11 +170,11 @@ reader.plot([0, 2, 4])        # group 1, 3 and 5
     * json
     * csv
 
-### Version 1.0.11
+#### Version 1.0.11
 * Progressbars indicate read-progress of files
 * Multiple plot modes
 
-### Version 1.0.0
+#### Version 1.0.0
 * Convert catman files to channels
 
 ## Meta
