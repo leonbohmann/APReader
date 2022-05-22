@@ -194,11 +194,33 @@ class APReader:
                 print(f'\t[ {self.fileName} ] Done. {len(self.Channels)} Channels left after filtering.') 
                 
                 
-    def plot(self):
+    def plot(self, groupIndices=None):
         """Plots the complete file.
         """
         name = os.path.basename(self.filepath)
         
+        groups = self.Groups
+        if groupIndices is not None:
+            groups = [self.Groups[x] for x in groupIndices]
 
         for group in self.Groups:
-            group.plot(governed=True)                              
+            group.plot()     
+            
+    def plotGroup(self, channelIndex):
+        """Plot a specific channel
+
+        Args:
+            channelIndex (int): The index of the channel.
+        """
+        for group in self.Groups:
+            group.plotChannels(channelIndex, channelIndex)
+    
+    def plotGroups(self, start, end):
+        """Plot a range of channels
+
+        Args:
+            start (int): Starting index, first channel is 0.
+            end (int): Ending index, supports -[index] to mark index from the end.
+        """
+        for group in self.Groups:
+            group.plot(range(start,end))                         

@@ -242,12 +242,7 @@ class Channel:
         """
         Default conversion to string.
         """
-        chan = ""
-        chan += (self.Name) + "\n"
-        for d in self.data:
-            chan += str(d) + "\n"
-            
-        return chan
+        return f'Channel "{self.Name}" ({self.length} Entries)'        
 
     def __getitem__(self, key) -> float:
         """Return the item at index key.
@@ -260,13 +255,9 @@ class Channel:
         """
         return self.data[key]
     
-    def plot(self, mode = 'ply', governed = False, axes=None, clr='b-'):
+    def plot(self, governed = False, axes=None, clr='b-'):
         """
         Plot the channel over its connected time-channel.
-
-        mode:
-            'ply'   Plotly,
-            'mat'   matplotlib
 
         governed:
             States wether the call to this function will handle figures and handles.
@@ -280,43 +271,29 @@ class Channel:
 
         if self.Time is None:
             print("\t[ APREAD/PLOT ] Channel does not have time data. Not plotting.")
-            return
-
-        
-        # filter data
-        # if self.verbose:
-        #     print(f'\t[ APREAD/PLOT ] Filtering plot for {self.Name}')
-        
-        #datay = sig.wiener(self.data)
+            return        
 
         plotbase = axes if axes is not None else plt
         
         
         if self.verbose:
             print(f'\t[ APREAD/PLOT ] Plotting {self.Name}')
-        if 'ply' in mode:
-            fig = px.line(x = self.Time.data, y = self.data, title = f'{self.Name}')
-            if not governed:
-                fig.show()
-            else:
-                print('Cant handle governed mode and plotly.')
-                return
-        elif 'mat' in mode:
-            if not governed:
-                fig = plt.figure(self.Name)
-                plt.xlabel('Time [s]')
-                plt.ylabel(self.unit)
+        
+        if not governed:
+            fig = plt.figure(self.Name)
+            plt.xlabel('Time [s]')
+            plt.ylabel(self.unit)
 
-            line = plotbase.plot(self.Time.data, self.data, color=clr, label=self.Name )
+        line = plotbase.plot(self.Time.data, self.data, color=clr, label=self.Name )
+        
+        
+        if not governed:
+            plt.title(self.Name)
+            plt.draw()
+            plt.legend()        
+            plt.show()
             
-            
-            if not governed:
-                plt.title(self.Name)
-                plt.draw()
-                plt.legend()        
-                plt.show()
-                
-            return line
+        return line
   
 class Group:
     """
@@ -410,39 +387,70 @@ class Group:
         """
         return (self.ChannelX[key], [chan[key] for chan in self.ChannelsY])
     
+    def __str__(self):        
+        return f'Group "{self.Name}" ({len(self.ChannelsY)} Data-channels, {self.ChannelX.length} Entries)'
     
-    def plot(self, governed=False):
-        """Plots this group of channels
+    def plotChannel(self, channelIndex):
+        """Plot a specific channel
 
         Args:
-            governed (bool, optional): States wether this plot-function is called from another plot-function. When nesting plot functions, the base function has to call plt.show. Defaults to False.
+            channelIndex (int): The index of the channel.
         """
-        fig, ax1 = plt.subplots()
+        self.plotChannels(channelIndex, channelIndex)
+    
+    def plotChannels(self, start, end):
+        """Plot a range of channels
+
+        Args:
+            start (int): Starting index, first channel is 0.
+            end (int): Ending index, supports -[index] to mark index from the end.
+        """
+        self.plot(range(start,end))
+    
+    def plot(self, channelIndices=None):
+        """
+        Plots this group of channels.
+        
+        Args:
+            channelIndices      The starting index of data channels to be plotted.            
             
+        Examples:
+            grp.plot() will plot all channels
+            grp.plot([0]) will plot the first data channel
+            grp.plot([0, 1, 3]) will plot the first, second and third data channel        
+        """
+        fig, ax1 = plt.subplots()            
         ax1.set_xlabel(self.ChannelX.unit)
         
-        cmap = get_clr(len(self.ChannelsY)+1)
+        
+        if channelIndices is None:
+            channels = self.ChannelsY                
+        else:
+            channels = [self.ChannelsY[x] for x in channelIndices]
+        
+        # create colormap
+        cmap = get_clr(len(channels)+1)
+        # save labels to retrieve them afterwards when building legend
         lns = []
         
         axis = ax1
-        for i,channel in enumerate(self.ChannelsY):
+        for i,channel in enumerate(channels):            
             if i > 0:
                 axis = ax1.twinx()            
             axis.set_ylabel(channel.unit)
-            
             axis.tick_params(axis='y', colors=cmap(i))
             axis.get_yaxis().label.set_color(cmap(i))  
-                      
-            chanLine = channel.plot(mode='mat', governed=True, clr=cmap(i))
+                                  
+            chanLine = channel.plot(governed=True, clr=cmap(i))
+            
             lns += chanLine
 
         labs = [l.get_label() for l in lns]
         ax1.legend(lns, labs, loc=0)
         ax1.grid()
-        
-        if not governed:
-            plt.title(self.Name)
-            plt.draw()
-            plt.legend()
-            plt.show()
-        
+            
+        plt.title(self.Name)
+        plt.draw()
+        plt.legend()
+        plt.show()
+    

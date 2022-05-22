@@ -17,8 +17,11 @@ reader = APReader(file)
 for group in reader.Groups:
     print("--------------")
     print (f"Group ({group.ChannelX.Name})")
-    
+
     for channel in group.Channels:
         print (f"\t{channel.Name:20}: {len(channel.data)} Entries")        
 
     print("--------------")
+    
+    
+reader.plot()
