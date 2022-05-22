@@ -132,13 +132,18 @@ Thanks to ([hakonbars PR13](https://github.com/leonbohmann/APReader/pull/13)) yo
 
 
 ## Release History
-### **Version 1.1**
 
+### Version 1.1.1
+* ----------------------------
+* ----------------------------
+* ----------------------------
+
+
+
+#### Version 1.1
 ##### Breaking changes
-
 * Removed saving functions, this will be up to the user
     > Since these function change a lot based on current needs, I decided to remove the post-processing functionality completely. The user now needs to do the post-processing on his own, meaning the creation of plots using time and data channels...
-
 ##### Changes
 * ([hakonbar PR13](https://github.com/leonbohmann/APReader/pull/13)) Differentiate floating point precision
 * ([hakonbar PR13](https://github.com/leonbohmann/APReader/pull/13)) Reading additional header information
