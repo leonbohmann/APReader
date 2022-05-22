@@ -1,0 +1,27 @@
+CATMAN TEST FILE
+PATH=C:\Users\sommer\Documents\HBM\catmanEasy\DATA\2022\Precision 4byte vs 8byte
+Job name=Job1
+Data file with path=C:\Users\sommer\Documents\HBM\catmanEasy\DATA\2022\Precision 4byte vs 8byte\8byteJob1_2022_04_12_13_31_23.bin
+Data file=8byteJob1_2022_04_12_13_31_23.bin
+DAQ project=Precision 4byte vs 8byte.MEP
+File comment=
+Time zone=Mitteleuropäische Sommerzeit (UTC+2:00)
+Bearbeiter=
+Abteilung=
+Kommentar=
+Default sample rate=300 Hz
+Slow sample rate=10 Hz
+Fast sample rate=4800 Hz
+Number of samples default sample rate=100
+Number of samples slow sample rate=0
+Number of samples fast sample rate=0
+Saving mode=AUTO
+Master/Slave mode=No
+Start mode=Manual
+Start time=2022/04/12 13:31:23
+Stop mode=Number of samples
+Stop time=2022/04/12 13:31:23
+catmanEasy/AP version=5.5.2.8
+Numerical precision=8 Byte Float
+Firmware MX840A=4.40.6.0
+DATAFILE=C:\Users\sommer\Documents\HBM\catmanEasy\DATA\2022\Precision 4byte vs 8byte\8byteJob1_2022_04_12_13_31_23.bin

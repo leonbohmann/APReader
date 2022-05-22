@@ -51,7 +51,7 @@ class BinaryReader:
         return ret.decode(encoding)
     def read_char(self, encoding: str = "ascii"):
         return struct.unpack(self.endian + "c", self.read(1))[0].decode(encoding)
-    def read_single(self) -> int:
+    def read_byte(self) -> int:
         return struct.unpack(self.endian + "b", self.read(1))[0]
     
     def read_int16(self) -> int:
@@ -59,6 +59,9 @@ class BinaryReader:
 
     def read_int32(self) -> int:
         return struct.unpack(self.endian + "i", self.read(4))[0]
+
+    def read_float(self) -> float:
+        return struct.unpack(self.endian + "f", self.read(4))[0]
 
     def read_double(self) -> float:
         return struct.unpack(self.endian + "d", self.read(8))[0]

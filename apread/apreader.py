@@ -7,11 +7,13 @@ import warnings
 import random
 from matplotlib import pyplot as plt
 from tqdm import tqdm
+import re
 
 # channel definition
 from apread.entries import Channel, Group
 # binary reader to read binary files
 from apread.binaryReader import BinaryReader
+from apread.tools import deprecated
 
 def align_yaxis(ax1, v1, ax2, v2):
     """adjust ax2 ylimit so that v2 in ax2 is aligned to v1 in ax1"""
@@ -38,7 +40,7 @@ class APReader:
     """
     Groups: List[Group]
 
-    def __init__(self, path, verbose=False, filterData=False):
+    def __init__(self, path, verbose=False, filterData=False, fastload=True):
         """Creates a new APReader based on a .binary file (path).
 
         Args:
@@ -48,6 +50,7 @@ class APReader:
         """
         self.verbose = verbose
         self.filterData = filterData
+        self.fastload = fastload
         self.filepath = path
         self.fileName = os.path.splitext(os.path.basename(path))[0]
         self.Channels = []
@@ -91,7 +94,7 @@ class APReader:
             timeChannel = None            
             for channel in group:
                 # condition: channel name has to contain "Zeit"
-                if str.upper("Zeit") in str.upper(channel.Name) or str.upper("Time") in str.upper(channel.Name):
+                if re.match(r"([T|t]ime)|([Z|z]eit)",channel.Name) is not None:
                     timeChannel = channel
                     # there is only one time-channel
                     break
@@ -129,91 +132,6 @@ class APReader:
             yield channel
         for group in self.Groups:
             yield group
-
-
-    def saveplot(self, path = None, mode='stack'):
-        """Saves a plot of the complete binary file.
-
-        Args:
-            path (str, optional): The path in which the plot should be saved. Defaults to None.
-            mode (str, optional): The plotting mode.
-                single     On top of each other.
-                stack      Stacked in subplots.
-        """
-        if path == None:
-            path = os.path.dirname(self.filepath)
-
-        # generate destination path
-        dest = os.path.join(path, self.fileName+ f'.pdf')
-        
-        # create path if not exist
-        if not os.path.exists(path):
-            os.makedirs(path)
-
-        nChannels = len([x for x in self.Channels if not x.isTime])
-        cmap = get_cmap(nChannels*10)
-
-        # create figure
-        c = 0
-        # plot channels in one figure
-        if mode == 'single':
-            fig, ax = plt.subplots()
-        # stack channels on top of each other
-        elif mode == 'stack':
-            fig,ax = plt.subplots(nChannels,1,sharex=True)
-
-        # add hint that data is filtered!
-        fig.suptitle(self.fileName + "(filtered)" if self.filterData else "")
-        fig.set_size_inches(30/2.54, 20/2.54)
-        xUsed = False
-        # plot all channels with their respective time-channels
-        for chan in self.Channels:
-            if not chan.isTime:   
-                # stack in subplots
-                if mode == 'stack':
-                    # get current axis from subplots
-                    #   if nChannels equals 1, there is only one axes
-                    if nChannels != 1:
-                        ax1 = ax[c]
-                    else:
-                        ax1 = ax
-                    ax1.set_ylabel(f'{chan.Name} [{chan.unit}]')                    
-                    ax1.plot(chan.Time.data, chan.data, color=cmap(c*10))
-                    c+=1      
-
-                    # label last x-axis
-                    if c >= nChannels:
-                        
-                        ax1.set_xlabel('Time [s]')
-
-                # other mode is single
-                elif xUsed:
-                    ax1 = ax.twinx()
-                    ax1.set_ylabel(f'{chan.Name} [{chan.unit}]')
-                    # align_yaxis(ax,0, ax1,0)
-                    ax1.plot(chan.Time.data, chan.data, color=cmap(c*10))
-                    c+=1
-                else:
-                    ax.set_ylabel(f'{chan.Name} [{chan.unit}]')
-                    ax.plot(chan.Time.data, chan.data, color=cmap(c*10))
-                    xUsed = True
-                    c+=1
-        
-        plt.draw()
-        plt.savefig(dest, format='pdf')
-
-    def save(self, mode, path = None):
-        """Save reader as text.
-
-        Args:
-            mode (str): 'csv' or 'json'
-            path (str): the destination directory(!) path
-        """
-        if path == None:
-            path = os.path.dirname(self.filepath)
-        
-        for thing in self:
-            thing.save(mode,path)
 
     def read(self):
         """
@@ -255,7 +173,7 @@ class APReader:
             for i in range(self.numChannels):
                 # create new channel on top of reader
                 #! be careful with current stream position
-                channel = Channel(reader, self.fileName, self.verbose, self.filterData)
+                channel = Channel(reader, self.fileName, self.verbose, self.filterData, self.fastload)
 
                 if not channel.broken and channel.length > 0:                    
                     self.Channels.append(channel)
@@ -273,20 +191,36 @@ class APReader:
                 channel.readData()
 
             if self.verbose:
-                print(f'\t[ {self.fileName} ] Done. {len(self.Channels)} Channels left after filtering.')
-
-                    
-            
-    def plot(self):
+                print(f'\t[ {self.fileName} ] Done. {len(self.Channels)} Channels left after filtering.') 
+                
+                
+    def plot(self, groupIndices=None):
         """Plots the complete file.
         """
         name = os.path.basename(self.filepath)
-        fig = plt.figure(name)
+        
+        groups = self.Groups
+        if groupIndices is not None:
+            groups = [self.Groups[x] for x in groupIndices]
 
         for group in self.Groups:
-            group.plot(governed=True)
+            group.plot()     
+            
+    def plotGroup(self, channelIndex):
+        """Plot a specific channel
 
-        plt.draw()
-        plt.title(name)
-        plt.legend()
-        plt.show()
+        Args:
+            channelIndex (int): The index of the channel.
+        """
+        for group in self.Groups:
+            group.plotChannels(channelIndex, channelIndex)
+    
+    def plotGroups(self, start, end):
+        """Plot a range of channels
+
+        Args:
+            start (int): Starting index, first channel is 0.
+            end (int): Ending index, supports -[index] to mark index from the end.
+        """
+        for group in self.Groups:
+            group.plot(range(start,end))                         
