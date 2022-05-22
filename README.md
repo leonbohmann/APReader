@@ -97,7 +97,7 @@ reader.plot([0, 2, 4])        # group 1, 3 and 5
 Thanks to ([hakonbars PR13](https://github.com/leonbohmann/APReader/pull/13)) you are now able to access external header information using `channel.exthdr`, a dicitionary containing all keys as described in [this sheet](https://github.com/leonbohmann/APReader/blob/dev-2/test/catmanBinaryFormat.xls).
 
 ```python
-['T0']				   # ACQ timestamp info (NOW format)
+['T0']                 # ACQ timestamp info (NOW format) 
 ['dt']                 # ACQ delta t in ms
 ['SensorType']         # IDS code of sensor type
 ['SupplyVoltage']      # IDS code supply voltage
@@ -142,6 +142,7 @@ Thanks to ([hakonbars PR13](https://github.com/leonbohmann/APReader/pull/13)) yo
 #### Changes
 * ([hakonbar PR13](https://github.com/leonbohmann/APReader/pull/13)) Differentiate floating point precision
 * ([hakonbar PR13](https://github.com/leonbohmann/APReader/pull/13)) Reading additional header information
+* ([hakonbar PR13](https://github.com/leonbohmann/APReader/pull/13)) Supplying binary format reference
 * Fixed null returning string conversion function
 * Using regex to find time channels
 * Improved plotting with multiple axes
