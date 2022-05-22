@@ -451,6 +451,5 @@ class Group:
             
         plt.title(self.Name)
         plt.draw()
-        plt.legend()
         plt.show()
     
