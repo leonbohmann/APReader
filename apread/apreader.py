@@ -191,4 +191,14 @@ class APReader:
                 channel.readData()
 
             if self.verbose:
-                print(f'\t[ {self.fileName} ] Done. {len(self.Channels)} Channels left after filtering.')                               
+                print(f'\t[ {self.fileName} ] Done. {len(self.Channels)} Channels left after filtering.') 
+                
+                
+    def plot(self):
+        """Plots the complete file.
+        """
+        name = os.path.basename(self.filepath)
+        
+
+        for group in self.Groups:
+            group.plot(governed=True)                              

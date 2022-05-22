@@ -259,7 +259,64 @@ class Channel:
             double: self.data[key]
         """
         return self.data[key]
+    
+    def plot(self, mode = 'ply', governed = False, axes=None, clr='b-'):
+        """
+        Plot the channel over its connected time-channel.
 
+        mode:
+            'ply'   Plotly,
+            'mat'   matplotlib
+
+        governed:
+            States wether the call to this function will handle figures and handles.
+            If False, a single figure will be shown.
+        """
+        # cant plot time over time
+        if self.isTime:
+            if self.verbose:
+                print("\t[ APREAD/PLOT ] Channel is time. Not plotting.")
+            return
+
+        if self.Time is None:
+            print("\t[ APREAD/PLOT ] Channel does not have time data. Not plotting.")
+            return
+
+        
+        # filter data
+        # if self.verbose:
+        #     print(f'\t[ APREAD/PLOT ] Filtering plot for {self.Name}')
+        
+        #datay = sig.wiener(self.data)
+
+        plotbase = axes if axes is not None else plt
+        
+        
+        if self.verbose:
+            print(f'\t[ APREAD/PLOT ] Plotting {self.Name}')
+        if 'ply' in mode:
+            fig = px.line(x = self.Time.data, y = self.data, title = f'{self.Name}')
+            if not governed:
+                fig.show()
+            else:
+                print('Cant handle governed mode and plotly.')
+                return
+        elif 'mat' in mode:
+            if not governed:
+                fig = plt.figure(self.Name)
+                plt.xlabel('Time [s]')
+                plt.ylabel(self.unit)
+
+            line = plotbase.plot(self.Time.data, self.data, color=clr, label=self.Name )
+            
+            
+            if not governed:
+                plt.title(self.Name)
+                plt.draw()
+                plt.legend()        
+                plt.show()
+                
+            return line
   
 class Group:
     """
@@ -352,3 +409,40 @@ class Group:
             double: self.data[key]
         """
         return (self.ChannelX[key], [chan[key] for chan in self.ChannelsY])
+    
+    
+    def plot(self, governed=False):
+        """Plots this group of channels
+
+        Args:
+            governed (bool, optional): States wether this plot-function is called from another plot-function. When nesting plot functions, the base function has to call plt.show. Defaults to False.
+        """
+        fig, ax1 = plt.subplots()
+            
+        ax1.set_xlabel(self.ChannelX.unit)
+        
+        cmap = get_clr(len(self.ChannelsY)+1)
+        lns = []
+        
+        axis = ax1
+        for i,channel in enumerate(self.ChannelsY):
+            if i > 0:
+                axis = ax1.twinx()            
+            axis.set_ylabel(channel.unit)
+            
+            axis.tick_params(axis='y', colors=cmap(i))
+            axis.get_yaxis().label.set_color(cmap(i))  
+                      
+            chanLine = channel.plot(mode='mat', governed=True, clr=cmap(i))
+            lns += chanLine
+
+        labs = [l.get_label() for l in lns]
+        ax1.legend(lns, labs, loc=0)
+        ax1.grid()
+        
+        if not governed:
+            plt.title(self.Name)
+            plt.draw()
+            plt.legend()
+            plt.show()
+        
