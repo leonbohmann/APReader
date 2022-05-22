@@ -47,27 +47,8 @@ for channel in reader.Channels:
     channel.plot()
 ``` 
 
-### Save Channels/Groups
-Use `save(mode, path)` to save a channel or group into a directory. The resulting file name will be the origin filename plus the groups or channels name. For ease of use you can call `reader.save(mode)` which is the equivalent to call `save` on every channel and group.
-```python
-for group in reader.Groups:
-    # plot the group (plots time and every channel on the y-axis)
-    group.plot()
-    # saves the group into csv-format (delimiter is \t) 
-    # time  y1  y2
-    group.save(mode='csv')
-
-    # saves the group into json-format
-    # dictionary of data: 
-    #   ['X'] : time
-    #   ['Yn'] : y-Channel (where n is index)
-    group.save(mode='json')
-
-``` 
-with the equivalent:
-```python
-reader.save(mode='json')
-``` 
+### Saving data
+From Version `1.1.x` on this is up to the user, since maintaining this area of code is quite tedious and prone to sudden changes.
 
 ## Examples
 Although not being a full example you can have a look into `testing.py` to get a glimpse of how to create a script using `apread`.
