@@ -134,7 +134,8 @@ Thanks to ([hakonbars PR13](https://github.com/leonbohmann/APReader/pull/13)) yo
 ## Release History
 
 ### Version 1.1.1
-* ----------------------------
+* Added converted timestamp property on channels (`Channel.date`)
+  * *Property `Channel.time` will be deleted at some point in the future...*
 * ----------------------------
 * ----------------------------
 
