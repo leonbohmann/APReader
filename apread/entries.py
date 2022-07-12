@@ -92,6 +92,7 @@ class Channel:
         excelTime = reader.read_double()
         timestamp = (excelTime - 25569) * 86400.0
         self.date = datetime.utcfromtimestamp(timestamp)
+        self.time = excelTime
         # extended channel header
         self.nHdrBytes = reader.read_int32()
         self.extHeader = self.readExtHeader(reader)
