@@ -1,4 +1,5 @@
 # binary reader import
+from datetime import datetime
 import os
 from time import time
 from apread.binaryReader import BinaryReader
@@ -88,7 +89,9 @@ class Channel:
         # get format of channel (8: numeric, >8: string)
         self.dw = reader.read_int16()
         # time of reading
-        self.time = reader.read_double()
+        excelTime = reader.read_double()
+        timestamp = (excelTime - 25569) * 86400.0
+        self.date = datetime.utcfromtimestamp(timestamp)
         # extended channel header
         self.nHdrBytes = reader.read_int32()
         self.extHeader = self.readExtHeader(reader)
