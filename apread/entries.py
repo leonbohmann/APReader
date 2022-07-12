@@ -2,6 +2,7 @@
 from datetime import datetime
 import os
 from time import time
+from tokenize import Double
 from apread.binaryReader import BinaryReader
 
 # plotting
@@ -24,6 +25,11 @@ from typing import List
 
 from apread.tools import deprecated
 
+def toTimestamp(serialFormat):
+    return (serialFormat - 25569) * 86400.0
+
+def toDatetime(timestamp):
+    return datetime.utcfromtimestamp(timestamp)
 
 def get_clr(n, name='hsv'):
     '''Returns a function that maps each index in 0, 1, ..., n-1 to a distinct 
@@ -46,7 +52,7 @@ class Channel:
     verbose: bool
     # Defines if data should be filtered.
     filterData: bool
-
+    
     def __init__(self, reader: BinaryReader, fileName='unknown', verbose=False, filterData=False, fastload=True):
         """
         Creates the Channel.
@@ -89,10 +95,8 @@ class Channel:
         # get format of channel (8: numeric, >8: string)
         self.dw = reader.read_int16()
         # time of reading
-        excelTime = reader.read_double()
-        timestamp = (excelTime - 25569) * 86400.0
-        self.date = datetime.utcfromtimestamp(timestamp)
-        self.time = excelTime
+        self.time = reader.read_double()
+        self.date = toDatetime(self.time)
         # extended channel header
         self.nHdrBytes = reader.read_int32()
         self.extHeader = self.readExtHeader(reader)
