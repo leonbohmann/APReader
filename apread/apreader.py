@@ -120,6 +120,10 @@ class APReader:
             
             # create new group based on the groups listed
             self.Groups.append(Group(group, self.fileName, self.verbose))
+        
+        if len(self.Channels) > 0:
+            self.date = self.Channels[0].date
+        
         pass
 
     def __iter__(self):
