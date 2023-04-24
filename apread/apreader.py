@@ -15,6 +15,8 @@ from apread.entries import Channel, Group
 from apread.binaryReader import BinaryReader
 from apread.tools import deprecated
 
+import multiprocessing as mp
+
 def align_yaxis(ax1, v1, ax2, v2):
     """adjust ax2 ylimit so that v2 in ax2 is aligned to v1 in ax1"""
     _, y1 = ax1.transData.transform((0, v1))
@@ -40,7 +42,7 @@ class APReader:
     """
     Groups: List[Group]
 
-    def __init__(self, path, verbose=False, filterData=False, fastload=True):
+    def __init__(self, path, verbose=False, filterData=False, fastload=True, parallelLoad=False, parallelPool = None):
         """Creates a new APReader based on a .binary file (path).
 
         Args:
@@ -53,6 +55,8 @@ class APReader:
         self.fastload = fastload
         self.filepath = path
         self.fileName = os.path.splitext(os.path.basename(path))[0]
+        self.parallelLoad = parallelLoad
+        self.parallelPool = parallelPool
         self.Channels = []
         self.Groups = []
         self.read()
@@ -104,6 +108,8 @@ class APReader:
                     if input(f"Is '{channel.Name}' your time/reference channel? [y/n] ") == "y":
                         timeChannel = channel
                         break
+# %%
+
             #%% sdasd
             # set the time-channel on every channel but itself
             if timeChannel != None:
@@ -177,7 +183,7 @@ class APReader:
             for i in range(self.numChannels):
                 # create new channel on top of reader
                 #! be careful with current stream position
-                channel = Channel(reader, self.fileName, self.verbose, self.filterData, self.fastload)
+                channel = Channel(reader, self.fileName, self.filepath, self.verbose, self.filterData, self.fastload, self.parallelLoad, self.parallelPool)
 
                 if not channel.broken and channel.length > 0:                    
                     self.Channels.append(channel)

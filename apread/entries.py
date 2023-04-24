@@ -1,29 +1,28 @@
 # binary reader import
 from datetime import datetime
 import os
-from time import time
-from tokenize import Double
 from apread.binaryReader import BinaryReader
 
 # plotting
 import matplotlib.pyplot as plt
-import plotly.express as px
-import scipy.signal as sig
-
-# serialization
-import json
+import multiprocessing as mp
 
 # progress
 from tqdm import tqdm
 from apread.loader import Loader
 import numpy as np
-# filtering
-from scipy.signal import lfilter
 
 # typing
 from typing import List
 
-from apread.tools import deprecated
+def read_chunk(file_path, start, end, typ = np.double):
+        with open(file_path, 'rb') as f:
+            f.seek(start)
+            chunk = np.fromfile(f, dtype=typ, count=end-start)
+        return chunk
+    
+def read_chunk_wrapper(args):
+    return read_chunk(*args)
 
 def toTimestamp(serialFormat):
     return (serialFormat - 25569) * 86400.0
@@ -53,12 +52,14 @@ class Channel:
     # Defines if data should be filtered.
     filterData: bool
     
-    def __init__(self, reader: BinaryReader, fileName='unknown', verbose=False, filterData=False, fastload=True):
+    def __init__(self, reader: BinaryReader, fileName='unknown', filepath='', verbose=False, filterData=False, fastload=True, parallelLoad=False, parallelPool=None):
         """
         Creates the Channel.
 
         Uses a reader (BinaryReader) to read the data from the file accessed by "APReader.__init__".
         """
+        self.parallelLoad = parallelLoad
+        self.parallelPool = parallelPool
         self.fastload = fastload
         # defines, if the apreader should output verbose debug messages
         self.verbose = verbose
@@ -82,7 +83,7 @@ class Channel:
         self.fileName = os.path.splitext(os.path.basename(fileName))[0]
         tName = self.Name.replace(' ',"_")  # temporary name
         self.fullName = f"{fileName}.{tName}"
-
+        self.filePath = filepath
         # retrieve unit of channel                
         
         self.unit = reader.read_string(reader.read_int16())
@@ -216,7 +217,13 @@ class Channel:
         if self.fastload:
             # The data is stored channelwise. We therefore only need to pass pointers to the first and last byte.
             if self.precision == 8 or self.precision == 4:
-                self.data = np.fromfile(self.reader.buf, dtype=np.dtype('f{}'.format(self.precision)), count=self.length)
+                datatype = np.dtype('f{}'.format(self.precision))
+                # parallel loading will split up the incoming bin array to 4 processes
+                if self.parallelLoad:
+                    self.data = self.read_data_parallel(12, datatype)
+                else:
+                    self.data = np.fromfile(self.reader.buf, dtype=datatype, count=self.length)
+                    
             elif self.precision == 2:
                 MinValue = self.reader.read_double()
                 MaxValue = self.reader.read_double()
@@ -302,7 +309,30 @@ class Channel:
             plt.show()
             
         return line
-  
+    
+    
+
+    def read_data_parallel(self,num_processes, dtype: np.dtype):
+        chunk_size = self.length // num_processes        
+        results = []
+        chunks = [(start, min(start + chunk_size, self.length)) for start in range(0, self.length, chunk_size)]
+        with mp.Pool(4) as pool:
+            results = [pool.apply_async(read_chunk, args=(self.filePath, start, end, dtype)) for (start, end) in chunks]               
+            for r in results:
+                r.wait()
+            
+            pool.close()
+            pool.join()
+            
+        data = np.empty(self.length, dtype)
+        
+        for result, (start, end) in zip(results, chunks):
+            data[start:end] = result.get()
+               
+        return data
+    
+    
+    
 class Group:
     """
     Groups channels together.
