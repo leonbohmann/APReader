@@ -38,7 +38,7 @@ class APReader:
     """
     Groups: List[Group]
 
-    def __init__(self, path, verbose=False, fastload=True, parallelPool = None):
+    def __init__(self, path, verbose=False, parallelPool = None):
         """Creates a new APReader based on a .binary file (path).
 
         Args:
@@ -48,7 +48,6 @@ class APReader:
                 done on the threads in the pool.
         """
         self.verbose = verbose
-        self.fastload = fastload
         self.filepath = path
         self.fileName = os.path.splitext(os.path.basename(path))[0]
         self.parallelLoad = parallelPool is not None
@@ -183,8 +182,8 @@ class APReader:
             for i in range(self.numChannels):
                 # create new channel on top of reader
                 #! be careful with current stream position
-                channel = Channel(reader, self.fileName, self.filepath, self.verbose, \
-                    self.fastload, self.parallelPool)
+                channel = Channel(reader, self.fileName, self.filepath,\
+                    self.verbose, self.parallelPool)
 
                 if not channel.broken and channel.length > 0:                    
                     self.Channels.append(channel)
