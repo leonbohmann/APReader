@@ -138,10 +138,12 @@ Thanks to ([hakonbars PR13](https://github.com/leonbohmann/APReader/pull/13)) yo
 
 > Only available from version `v1.1.1-alpha1` and above
 
-See `test/testing.py` for a full example.
+See `test/testing.py` for a full example. Modify the following around your `APReader` call:
 
 ```python
 import multiprocessing as mp
+...
+
 
 if __name__ == '__main__': # this line has to be included!
     # without 'processes=...'!
