@@ -1,3 +1,4 @@
+from datetime import datetime
 from apread.apreader import APReader
 import os
 import multiprocessing as mp
@@ -16,9 +17,22 @@ if __name__ == '__main__':
 
     if loadInParallel:
         pool = mp.Pool()        
-        
+    
+    t0 = datetime.now()
     # create a reader
     reader = APReader(file, parallelPool=pool)
+
+    t1 = datetime.now()
+    
+    print(t1-t0)
+
+    t0 = datetime.now()
+    # create a reader
+    reader = APReader(file, parallelPool=None)
+
+    t1 = datetime.now()
+    
+    print(t1-t0)
 
     if loadInParallel:
         pool.close()
