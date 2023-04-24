@@ -1,9 +1,9 @@
+# **apread** (Catman AP Reader)
 
 [![PyPi Upload](https://github.com/leonbohmann/APReader/actions/workflows/python-publish.yml/badge.svg)](https://github.com/leonbohmann/APReader/actions/workflows/python-publish.yml)
 ![pyPI - Version](https://img.shields.io/pypi/v/apread?label=package%20version)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/apread?color=green&label=PyPi%20Downloads&style=plastic)
 
-# **apread** (Catman AP Reader)
 > Read binary files produced from catmanAP projects directly into python.
 
 CatmanAP procudes .bin files after each measurement. While it is possible to export as a different format (i.e. txt or asc) it's not efficient because one has to change the export format after every measurement. Here comes the treat: Just export as binary and use this package to work with binary files directly.
@@ -12,7 +12,6 @@ After reading all channels from the binary file, the channels are analyzed and e
 
 Here is an example plot, generated directly from a binary file:
 ![apread_demo_out_1](https://user-images.githubusercontent.com/13386367/169707732-240a916e-228f-4ef9-8c3c-e560a2647c97.png)
-
 
 ## Installation/Update
 
@@ -23,6 +22,7 @@ pip install -U apread
 ```
 
 ## How it works
+
 The workflow of the package is straight-forward. You supply a binary file created with CatmanAP and the script will read that into python.
 
 First of all, the binary data is analyzed and packaged into seperate `Channel` objects. When all `Channels` are created, each `Channel.Name` will be checked against `([T|t]ime)|([Z|z]eit)`, which mark time channels which usually are the reference.
@@ -33,15 +33,16 @@ Now that the Data is available in python you are free to do with that whatever y
 
 ## Usage
 
-Lets say you produced a file called `measurements.bin` and you put it in the directory of your python script, then you can create the `APReader` on that file. It's that simple. The Initialization may take some time depending on how large your .bin-File is. 
+Lets say you produced a file called `measurements.bin` and you put it in the directory of your python script, then you can create the `APReader` on that file. It's that simple. The Initialization may take some time depending on how large your .bin-File is.
 
 ```python
 from apread import APReader
 
 reader = APReader('measurements.bin')   # this will read in the file
-``` 
+```
 
 ### Print channels
+
 Afterwards you can access the `Channels` by accessing the `APReader.Channels` Member. `Channel` and `Group` implement `__str__` which will return the name and the length of data inside it.
 
 ```python
@@ -54,7 +55,7 @@ for channel in reader.Channels:
 # "Timechannel 1 - Quick" (3022344 Entries)
 # "F1" (3022344 Entries)
 # "ast089" (3022344 Entries)
-``` 
+```
 
 ```python
 for group in reader.Groups:
@@ -62,9 +63,10 @@ for group in reader.Groups:
 
 # "Timechannel 1 - Standard" (2 Data-channels, 120341 Entries)
 # "Timechannel 1 - Quick" (2 Data-channels, 3022344 Entries)
-``` 
+```
 
 ### Plot Channels/Groups
+
 To review your data on the fly, you can plot every entity in the data structure by calling `.plot()`. When plotting, every group will get its own figure window, in which all connected channels are plotted.
 
 ```python
@@ -76,24 +78,28 @@ for group in reader.Groups:
 # plot all channels
 for channel in reader.Channels:
     channel.plot()
-``` 
+```
 
 As you can see, you can access the channels from the reader, which contains all channels (including time channels) or you can access them from the groups.
 
 There are some more functions to plot specific data. When plotting multiple channels each channel gets its own y-axis.
+
 ```python
 group.plotChannel(0)           # specific channel
 group.plotChannels(0,3)        # channel 1 to 3 (1,2,3)
 group.plot([0, 2, 4])          # channel 1, 3 and 5
-``` 
+```
 
 The same can be applied to the `APReader`. The only difference is that you can plot specific groups instead of channels.
+
 ```python
 reader.plotGroup(0)           # specific group
 reader.plotGroups(0,3)        # group 1 to 3 (1,2,3)
 reader.plot([0, 2, 4])        # group 1, 3 and 5
 ``` 
+
 ### External Header
+
 Thanks to ([hakonbars PR13](https://github.com/leonbohmann/APReader/pull/13)) you are now able to access external header information using `channel.exthdr`, a dicitionary containing all keys as described in [this sheet](https://github.com/leonbohmann/APReader/blob/dev-2/test/catmanBinaryFormat.xls).
 
 ```python
@@ -128,24 +134,56 @@ Thanks to ([hakonbars PR13](https://github.com/leonbohmann/APReader/pull/13)) yo
 ['ExportFormat']       # 0=8-Byte Double, 1=4-Byte Single, 2=2-Byte Integer (FOR CATMAN BINARY EXPORT ONLY!)    
 ```
 
+### Parallel reading of data
 
+> Only available from version `v1.1.1-alpha1` and above
 
+See `test/testing.py` for a full example.
+
+```python
+import multiprocessing as mp
+
+if __name__ == '__main__': # this line has to be included!
+    # without 'processes=...'!
+    pool = mp.Pool() 
+
+    # pass the pool to the reader
+    reader = APReader(file, parallelPool=pool)
+
+    # make sure to close the pool after you are done with it
+    mp.close()
+    mp.join()
+```
+
+For the parallel loading to work, you have to define a parallel pool of processes in your top-level script. These processes will be accessed from within `APReader`-Functions. When passing no arguments to `mp.Pool()` it will automatically create as many processes as possible, according to the amount of threads your CPU allows (cores + virtual cores). It does not make sense to pass in more, since the `APReader` spawns the same amount of processes as there are CPU Threads. Increasing the amount of processes in your pool does not increase the amount of parallelism. It is fixed.
+
+> Keep in mind, that parallelisation is not always faster. Spawning of processes is expensive and can be wasteful for small files.
+
+The results from `APReader` stay the same and you can continue your analysis.
 
 ## Release History
 
-### Version 1.1.1
+### Version 1.1.1-alpha1
+
+* Parallel reading of binary files
+  * Max degree of parallelism is defined with maximum amount of processors
+
+#### Version 1.1.1
+
 * Added converted timestamp property on channels (`Channel.date`)
   * *Property `Channel.time` will be deleted at some point in the future...*
 * ----------------------------
 * ----------------------------
-
-
-
+  
 #### Version 1.1
+
 ##### Breaking changes
+
 * Removed saving functions, this will be up to the user
     > Since these function change a lot based on current needs, I decided to remove the post-processing functionality completely. The user now needs to do the post-processing on his own, meaning the creation of plots using time and data channels...
+
 ##### Changes
+
 * ([hakonbar PR13](https://github.com/leonbohmann/APReader/pull/13)) Differentiate floating point precision
 * ([hakonbar PR13](https://github.com/leonbohmann/APReader/pull/13)) Reading additional header information
 * ([hakonbar PR13](https://github.com/leonbohmann/APReader/pull/13)) Supplying binary format reference
@@ -154,35 +192,47 @@ Thanks to ([hakonbars PR13](https://github.com/leonbohmann/APReader/pull/13)) yo
 * Improved plotting with multiple axes
 * Printing channels and groups will now give a summary instead of all data
 
-
 #### Version 1.0.22
+
 * Fixed an issue with groups where time channels are not recognized
-*  now, user is prompted, when suspected time channel is found
-*  plotting is not possible when there is no time-channel found
-*  save groups and channels even when there is no time channel
+* now, user is prompted, when suspected time channel is found  
+* plotting is not possible when there is no time-channel found
+* save groups and channels even when there is no time channel
+
 #### Version 1.0.21
+
 * Updated serialisation-procedures to always encode in `UTF-8`
+
 #### Version 1.0.20
+
 * Switched to explicit type hinting with `typing` package (compatibility issues with python <3.9.x)  
+
 #### Version 1.0.15/16
+
 * Fixed an issue with saving and non-existent directories
 * Added `getas` to generate formatted string without saving
+
 #### Version 1.0.14
+
 * Output file-names updated
+
 #### Version 1.0.12/13
+
 * Group channels with their time-channel into "groups"
 * Multiple plot modes:
-    * Whole file
-    * Channel/Group only
+  * Whole file
+  * Channel/Group only
 * Output data
-    * json
-    * csv
+  * json
+  * csv
 
 #### Version 1.0.11
+
 * Progressbars indicate read-progress of files
 * Multiple plot modes
 
 #### Version 1.0.0
+
 * Convert catman files to channels
 
 ## Meta
@@ -190,5 +240,7 @@ Thanks to ([hakonbars PR13](https://github.com/leonbohmann/APReader/pull/13)) yo
 Leon Bohmann – mail@leonbohmann.de
 
 Distributed under the MIT license. See ``LICENSE`` for more information.
+
+This software comes with no warranty, expressed or implied. Use at your own risk!
 
 [https://github.com/leonbohmann/apreader](https://github.com/leonbohmann/apreader)
