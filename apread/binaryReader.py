@@ -2,7 +2,6 @@ import struct
 from os import SEEK_CUR
 from typing import BinaryIO
 
-import numpy as np
 
 ENDIAN_PREFIXES = ("@", "<", ">", "=", "!")
 

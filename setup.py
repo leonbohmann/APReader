@@ -26,6 +26,6 @@ setup(
         "Programming Language :: Python :: 3.9",
     ],
     packages=['apread'],
-    install_requires=['matplotlib', 'plotly', 'scipy', 'typing', 'tqdm', 'pandas'],
+    install_requires=['matplotlib', 'typing', 'tqdm', 'pandas', 'multiprocessing'],
     include_package_data=True,
 )

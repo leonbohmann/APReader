@@ -2,22 +2,27 @@ from apread.apreader import APReader
 import os
 import multiprocessing as mp
 
-# find current directory
-dirname = os.path.dirname(__file__)
-file = os.path.join(dirname, 'Example_Catman_Data.bin')
-
-outdir = os.path.join(dirname, 'output')
-
-# create parallel pool
-
-mp.freeze_support()
 if __name__ == '__main__':
-    pool = mp.Pool(12)
-    # create a reader
-    reader = APReader(file, parallelLoad=True, parallelPool=pool)
+    pool = None # default value, do not change
 
-    pool.close()
-    pool.join()
+    # find current directory
+    dirname = os.path.dirname(__file__)
+    file = os.path.join(dirname, 'Example_Catman_Data.bin')
+
+    outdir = os.path.join(dirname, 'output')
+
+    # specify wether to use parallel loading of channel data
+    loadInParallel = False
+
+    if loadInParallel:
+        pool = mp.Pool()        
+        
+    # create a reader
+    reader = APReader(file, parallelPool=pool)
+
+    if loadInParallel:
+        pool.close()
+        pool.join()
     ## print all single channels
     #for channel in reader.Channels:    
     #    print (f"{channel.Name}: {len(channel.data)} Entries")
