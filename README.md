@@ -165,13 +165,10 @@ The results from `APReader` stay the same and you can continue your analysis.
 
 ### Version 1.1.1-alpha1
 
-* Parallel reading of binary files
-  * Max degree of parallelism is defined with maximum amount of processors
-
-#### Version 1.1.1
-
 * Added converted timestamp property on channels (`Channel.date`)
   * *Property `Channel.time` will be deleted at some point in the future...*
+* Parallel reading of binary files
+  * Max degree of parallelism is defined with maximum amount of processors
 * ----------------------------
 * ----------------------------
   
