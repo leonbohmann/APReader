@@ -14,21 +14,24 @@ if __name__ == '__main__':
 
     # specify wether to use parallel loading of channel data
     loadInParallel = False
-
+    speedTest = False
+    
     if loadInParallel:
         pool = mp.Pool()        
     
-    t0 = datetime.now()
-    # create a reader
-    reader = APReader(file, parallelPool=pool)
+    # t0 = datetime.now()
+    # # create a reader
+    # for i in range(1,1000):
+    #     reader = APReader(file, parallelPool=pool)
 
-    t1 = datetime.now()
+    # t1 = datetime.now()
     
-    print(t1-t0)
+    # print(t1-t0)
 
     t0 = datetime.now()
     # create a reader
-    reader = APReader(file, parallelPool=None)
+    for i in range(1,1000 if speedTest else 1):
+        reader = APReader(file, parallelPool=pool)
 
     t1 = datetime.now()
     
