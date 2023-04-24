@@ -1,17 +1,20 @@
+import multiprocessing as mp
 import os
+import re
+
 # binary imports
 from os import SEEK_SET
 from typing import List
+
 from matplotlib import pyplot as plt
 from tqdm import tqdm
-import re
 
-# channel definition
-from apread.entries import Channel, Group
 # binary reader to read binary files
 from apread.binaryReader import BinaryReader
 
-import multiprocessing as mp
+# channel definition
+from apread.entries import Channel, Group
+
 
 def align_yaxis(ax1, v1, ax2, v2):
     """adjust ax2 ylimit so that v2 in ax2 is aligned to v1 in ax1"""

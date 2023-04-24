@@ -1,21 +1,21 @@
 # binary reader import
-from datetime import datetime
+# parallel processing
+import multiprocessing as mp
 import os
-from apread.binaryReader import BinaryReader
+from datetime import datetime
+from multiprocessing.pool import Pool as mpPool
+
+# typing
+from typing import List
 
 # plotting
 import matplotlib.pyplot as plt
 
-# parallel processing
-import multiprocessing as mp
-from multiprocessing.pool import Pool as mpPool
-
 # progress
-from tqdm import tqdm
 import numpy as np
 
-# typing
-from typing import List
+from apread.binaryReader import BinaryReader
+
 
 def read_chunk_from_file(file_path, start, end, typ, buf_loc) -> np.ndarray:
     """Reads a chunk of a file by opening a binary reader.
@@ -201,12 +201,12 @@ class Channel:
         exthdr['ScaleType'] = rdr.read_byte() # 124
         exthdr['SoftwareTareVal'] = rdr.read_float() # 128        
         exthdr['WriteProtected'] = rdr.read_byte() # 129
-        padding = rdr.read_string(3) # 132
+        rdr.read_string(3) # 132
         
         exthdr['NominalRange'] = rdr.read_float() # 136 
         exthdr['CLCFactor'] = rdr.read_float() # 140
         exthdr['ExportFormat'] = rdr.read_byte() # 141
-        reserve = rdr.read_string(7) # 148
+        rdr.read_string(7) # 148
         # reserve = rdr.read_string(10)        
         posN = rdr.tell()
         
@@ -240,9 +240,11 @@ class Channel:
         # The data is stored channelwise. We therefore only need to pass pointers to the first and last byte.
         if self.precision == 8 or self.precision == 4:
             datatype = np.dtype('f{}'.format(self.precision))                
-            # parallel loading will split up the incoming bin array to 4 processes
+            # parallel loading will split up the incoming bin array
             if self.parallelLoad:
                 self.data = self.read_data_parallel(datatype)
+                
+            # default loading will load all entries at once
             else:
                 self.data = np.fromfile(self.reader.buf, dtype=datatype, count=self.length)
                 
@@ -294,7 +296,7 @@ class Channel:
             print(f'\t[ APREAD/PLOT ] Plotting {self.Name}')
         
         if not governed:
-            fig = plt.figure(self.Name)
+            plt.figure(self.Name)
             plt.xlabel('Time [s]')
             plt.ylabel(self.unit)
 
