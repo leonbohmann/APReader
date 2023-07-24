@@ -2,7 +2,7 @@
 [![PyPi Upload](https://github.com/leonbohmann/APReader/actions/workflows/python-publish.yml/badge.svg)](https://github.com/leonbohmann/APReader/actions/workflows/python-publish.yml)
 ![pyPI - Version](https://img.shields.io/pypi/v/apread?label=package%20version)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/apread?color=green&label=PyPi%20Downloads&style=plastic)
-
+[![Downloads](https://static.pepy.tech/personalized-badge/apread?period=total&units=international_system&left_color=grey&right_color=brightgreen&left_text=Total%20Downloads)](https://pepy.tech/project/apread)
 # **apread** (Catman AP Reader)
 > Read binary files produced from catmanAP projects directly into python.
 
