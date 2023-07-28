@@ -55,3 +55,31 @@ if __name__ == '__main__':
         
         
     reader.plot()
+
+def channel_dates():
+    reader = APReader("file.bin")
+    
+    for channel in reader.Channels:
+        print(channel.date) # 12.1.2023: 18:08 ...
+
+def test2():
+    reader = APReader("file.bin")
+
+    for group in reader.Groups:
+        # alle channels in der gruppe
+        channels = group.Channels
+        # X-Channel der Gruppe (Zeit)
+        channelX = group.ChannelX
+        # alle Y channels, also Messreihen der Gruppe
+        channelsY = group.ChannelsY
+        
+        # data in z.B. der ersten Messreihe
+        channel1 = channelsY[0]
+        # das ist das numpy-array mit den tatsächlichen Werten drin
+        data = channel1.data
+        print(data)
+        
+    # ALTERNATIV (alle channels in der bin Datei):
+    for channel in reader.Channels:
+        print(channel.data)
+        
