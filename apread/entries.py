@@ -419,10 +419,10 @@ class Group:
             unit = 'ms'
             fac = 1e3
         if timeC.data[1] < 1e-3:
-            unit = 'ns'
+            unit = 'μs'
             fac = 1e6
         if timeC.data[1] < 1e-6:
-            unit = 'μs'
+            unit = 'ns'
             fac = 1e9
 
         self.intervalstr = f"{timeC.data[1]*fac:.3f}{unit}"
