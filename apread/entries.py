@@ -369,7 +369,7 @@ class Group:
 
     # the data time interval with a fitting unit
     intervalstr: str
-    # the data time interval in milliseconds
+    # the data time interval in seconds
     interval: float
     # frequency of the corresponding time
     frequency: float
@@ -426,7 +426,7 @@ class Group:
             fac = 1e9
 
         self.intervalstr = f"{timeC.data[1]*fac:.3f}{unit}"
-        self.interval = timeC[1]/1e3
+        self.interval = timeC[1]
         self.frequency = 1/timeC.data[1]
 
     def __getitem__(self, key):
