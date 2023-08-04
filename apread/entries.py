@@ -4,6 +4,7 @@ import multiprocessing as mp
 import os
 from datetime import datetime
 from multiprocessing.pool import Pool as mpPool
+import plotly.graph_objects as go
 
 # typing
 from typing import List
@@ -472,7 +473,7 @@ class Group:
             grp.plot([0]) will plot the first data channel
             grp.plot([0, 1, 3]) will plot the first, second and third data channel        
         """
-        fig, ax1 = plt.subplots()            
+        fig, ax1 = plt.subplots()
         ax1.set_xlabel(self.ChannelX.unit)
         
         
