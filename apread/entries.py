@@ -4,7 +4,6 @@ import multiprocessing as mp
 import os
 from datetime import datetime
 from multiprocessing.pool import Pool as mpPool
-import plotly.graph_objects as go
 
 # typing
 from typing import List
