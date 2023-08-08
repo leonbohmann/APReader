@@ -4,6 +4,11 @@
 ![pyPI - Version](https://img.shields.io/pypi/v/apread?label=package%20version)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/apread?color=green&label=PyPi%20Downloads&style=plastic)
 
+## Support this project
+<a href="https://www.buymeacoffee.com/leonbohmann" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
+
+## General
+
 > Read binary files produced from catmanAP projects directly into python.
 
 CatmanAP procudes .bin files after each measurement. While it is possible to export as a different format (i.e. txt or asc) it's not efficient because one has to change the export format after every measurement. Here comes the treat: Just export as binary and use this package to work with binary files directly.
