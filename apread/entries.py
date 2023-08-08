@@ -1,28 +1,48 @@
 # binary reader import
+# parallel processing
+import multiprocessing as mp
 import os
-from time import time
-from apread.binaryReader import BinaryReader
-
-# plotting
-import matplotlib.pyplot as plt
-import plotly.express as px
-import scipy.signal as sig
-
-# serialization
-import json
-
-# progress
-from tqdm import tqdm
-from apread.loader import Loader
-import numpy as np
-# filtering
-from scipy.signal import lfilter
+from datetime import datetime
+from multiprocessing.pool import Pool as mpPool
 
 # typing
 from typing import List
 
-from apread.tools import deprecated
+# plotting
+import matplotlib.pyplot as plt
 
+# progress
+import numpy as np
+
+from apread.binaryReader import BinaryReader
+
+
+def read_chunk_from_file(file_path, start, end, typ, buf_loc) -> np.ndarray:
+    """Reads a chunk of a file by opening a binary reader.
+
+    Args:
+        file_path (str): Filepath to the file.
+        start (int): Start buffer location in entries.
+        end (int): End buffer location in entries.
+        typ (nd.dtype): The type of data.
+        cur_loc (int): Current buffer location in bytes.
+
+    Returns:
+        np.ndarray: The chunk of the file as a numbered array.
+    """
+    # open the file and seek the buffer to the start of channel entries
+    with open(file_path, 'rb') as f:
+        f.seek(buf_loc)
+        # read the chunk of data from the file
+        chunk = np.fromfile(f, dtype=typ, offset=start * typ.itemsize, count=end-start)
+        
+    return chunk    
+
+def toTimestamp(serialFormat):
+    return (serialFormat - 25569) * 86400.0
+
+def toDatetime(timestamp):
+    return datetime.utcfromtimestamp(timestamp)
 
 def get_clr(n, name='hsv'):
     '''Returns a function that maps each index in 0, 1, ..., n-1 to a distinct 
@@ -45,18 +65,29 @@ class Channel:
     verbose: bool
     # Defines if data should be filtered.
     filterData: bool
-
-    def __init__(self, reader: BinaryReader, fileName='unknown', verbose=False, filterData=False, fastload=True):
+    
+    # Specifies if channel entries should be loaded in parallel.
+    parallelLoad: bool
+    # Amount of parallel processes that can be used to load data.
+    parallelProcs: int
+    # The parallel pool which holds parallel processes.
+    parallelPool: mpPool
+    
+    def __init__(self, reader: BinaryReader, fileName='unknown', filepath='', \
+        verbose=False, parallelPool=None):
         """
         Creates the Channel.
 
         Uses a reader (BinaryReader) to read the data from the file accessed by "APReader.__init__".
         """
-        self.fastload = fastload
+        
+        # parallel stuff
+        self.parallelLoad = parallelPool is not None
+        self.parallelPool = parallelPool
+        self.parallelProcs = len(mp.active_children())
+        
         # defines, if the apreader should output verbose debug messages
         self.verbose = verbose
-        # defines, wether read data should be filtered
-        self.filterData = filterData
 
         # referenced time channel (dummy, since this may stay None)
         self.Time = None
@@ -75,7 +106,7 @@ class Channel:
         self.fileName = os.path.splitext(os.path.basename(fileName))[0]
         tName = self.Name.replace(' ',"_")  # temporary name
         self.fullName = f"{fileName}.{tName}"
-
+        self.filePath = filepath
         # retrieve unit of channel                
         
         self.unit = reader.read_string(reader.read_int16())
@@ -89,6 +120,7 @@ class Channel:
         self.dw = reader.read_int16()
         # time of reading
         self.time = reader.read_double()
+        self.date = toDatetime(self.time)
         # extended channel header
         self.nHdrBytes = reader.read_int32()
         self.extHeader = self.readExtHeader(reader)
@@ -169,12 +201,12 @@ class Channel:
         exthdr['ScaleType'] = rdr.read_byte() # 124
         exthdr['SoftwareTareVal'] = rdr.read_float() # 128        
         exthdr['WriteProtected'] = rdr.read_byte() # 129
-        padding = rdr.read_string(3) # 132
+        rdr.read_string(3) # 132
         
         exthdr['NominalRange'] = rdr.read_float() # 136 
         exthdr['CLCFactor'] = rdr.read_float() # 140
         exthdr['ExportFormat'] = rdr.read_byte() # 141
-        reserve = rdr.read_string(7) # 148
+        rdr.read_string(7) # 148
         # reserve = rdr.read_string(10)        
         posN = rdr.tell()
         
@@ -204,40 +236,24 @@ class Channel:
         # if something was wrong previously, nothing will happen here
         if self.broken:
             return
-        
-        if self.fastload:
-            # The data is stored channelwise. We therefore only need to pass pointers to the first and last byte.
-            if self.precision == 8 or self.precision == 4:
-                self.data = np.fromfile(self.reader.buf, dtype=np.dtype('f{}'.format(self.precision)), count=self.length)
-            elif self.precision == 2:
-                MinValue = self.reader.read_double()
-                MaxValue = self.reader.read_double()
-                sf = (MaxValue - MinValue)/32767 # scale factor
-                self.data = np.fromfile(self.reader.buf, dtype=np.dtype('u2'), count=self.length)*sf + MinValue
-        else:
-            # initialize data
-            self.data = []
-
-            # read all channel data            
-            if self.precision == 8:
-                for i in tqdm(range(self.length), leave=False):
-                    self.data.append(self.reader.read_double())
-            elif self.precision == 4:
-                for i in tqdm(range(self.length), leave=False):
-                    self.data.append(self.reader.read_float())
-            elif self.precision == 2:                
-                MinValue = self.reader.read_double()
-                MaxValue = self.reader.read_double()
-                sf = (MaxValue - MinValue)/32767 # scale factor
+                        
+        # The data is stored channelwise. We therefore only need to pass pointers to the first and last byte.
+        if self.precision == 8 or self.precision == 4:
+            datatype = np.dtype('f{}'.format(self.precision))                
+            # parallel loading will split up the incoming bin array
+            if self.parallelLoad:
+                self.data = self.read_data_parallel(datatype)
                 
-                for i in tqdm(range(self.length), leave=False):
-                    self.data.append(self.reader.read_int16()*sf + MinValue)
-
-        # filter data
-        if self.filterData:
-            with Loader('Filtering data...'):
-                self.data = self.filter()
-
+            # default loading will load all entries at once
+            else:
+                self.data = np.fromfile(self.reader.buf, dtype=datatype, count=self.length)
+                
+        elif self.precision == 2:
+            MinValue = self.reader.read_double()
+            MaxValue = self.reader.read_double()
+            sf = (MaxValue - MinValue)/32767 # scale factor
+            self.data = np.fromfile(self.reader.buf, dtype=np.dtype('u2'), count=self.length)*sf + MinValue
+    
     def __str__(self):
         """
         Default conversion to string.
@@ -280,7 +296,7 @@ class Channel:
             print(f'\t[ APREAD/PLOT ] Plotting {self.Name}')
         
         if not governed:
-            fig = plt.figure(self.Name)
+            plt.figure(self.Name)
             plt.xlabel('Time [s]')
             plt.ylabel(self.unit)
 
@@ -294,7 +310,44 @@ class Channel:
             plt.show()
             
         return line
-  
+    
+    
+
+    def read_data_parallel(self, dtype):
+        """Reads in the underlying binary data using multiple parallel tasks.
+
+        Args:
+            dtype (nd.dtype): The type of the underlying layer data entries (f4, f8, ...).
+
+        Returns:
+            ndarray: Array of the binary data.
+        """
+        # chunk the total length of this channel
+        chunk_size = self.length // self.parallelProcs        
+                
+        # current location of the buffered binary reader
+        cur_loc = self.reader.tell()
+
+        # chunk the length
+        chunks = [(start, min(start + chunk_size, self.length)) for start in range(0, self.length, chunk_size)]
+        results = [self.parallelPool.apply_async(read_chunk_from_file, args=(self.filePath, start, end, dtype, cur_loc)) for (start, end) in chunks]
+
+        # wait for results to finish and check if they finished successfully
+        for r in results:
+            r.wait()
+            if not r.successful():
+                print('Error in loading task!')
+        
+        # concatenate the data structure
+        data = np.empty(self.length, dtype)
+        for result, (start, end) in zip(results, chunks):
+            data[start:end] = result.get()
+        
+        # push the underlying original reader to after the channel items
+        self.reader.seek(cur_loc + self.length * dtype.itemsize)
+        return data
+
+
 class Group:
     """
     Groups channels together.
@@ -316,7 +369,7 @@ class Group:
 
     # the data time interval with a fitting unit
     intervalstr: str
-    # the data time interval in milliseconds
+    # the data time interval in seconds
     interval: float
     # frequency of the corresponding time
     frequency: float
@@ -366,14 +419,14 @@ class Group:
             unit = 'ms'
             fac = 1e3
         if timeC.data[1] < 1e-3:
-            unit = 'ns'
+            unit = 'μs'
             fac = 1e6
         if timeC.data[1] < 1e-6:
-            unit = 'μs'
+            unit = 'ns'
             fac = 1e9
 
         self.intervalstr = f"{timeC.data[1]*fac:.3f}{unit}"
-        self.interval = timeC[1]/1e3
+        self.interval = timeC[1]
         self.frequency = 1/timeC.data[1]
 
     def __getitem__(self, key):
@@ -419,7 +472,7 @@ class Group:
             grp.plot([0]) will plot the first data channel
             grp.plot([0, 1, 3]) will plot the first, second and third data channel        
         """
-        fig, ax1 = plt.subplots()            
+        fig, ax1 = plt.subplots()
         ax1.set_xlabel(self.ChannelX.unit)
         
         

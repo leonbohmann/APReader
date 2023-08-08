@@ -2,6 +2,7 @@ import struct
 from os import SEEK_CUR
 from typing import BinaryIO
 
+
 ENDIAN_PREFIXES = ("@", "<", ">", "=", "!")
 
 
@@ -68,3 +69,5 @@ class BinaryReader:
     # Aliases
     def read_int(self) -> int:
         return self.read_int32()
+    
+    

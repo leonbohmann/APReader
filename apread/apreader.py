@@ -1,19 +1,20 @@
+import multiprocessing as mp
 import os
+import re
+
 # binary imports
 from os import SEEK_SET
 from typing import List
-# import this to show warnings
-import warnings
-import random
+
 from matplotlib import pyplot as plt
 from tqdm import tqdm
-import re
+
+# binary reader to read binary files
+from apread.binaryReader import BinaryReader
 
 # channel definition
 from apread.entries import Channel, Group
-# binary reader to read binary files
-from apread.binaryReader import BinaryReader
-from apread.tools import deprecated
+
 
 def align_yaxis(ax1, v1, ax2, v2):
     """adjust ax2 ylimit so that v2 in ax2 is aligned to v1 in ax1"""
@@ -40,21 +41,26 @@ class APReader:
     """
     Groups: List[Group]
 
-    def __init__(self, path, verbose=False, filterData=False, fastload=True):
+    def __init__(self, path, verbose=False, parallelPool = None):
         """Creates a new APReader based on a .binary file (path).
 
         Args:
             path (str): path to a catmanAP binary file.
             verbose (boolean): Show debug output.
-            filterData (boolean): Filter input data.
+            parallelPool (multiprocessing.Pool): If passed, the loading of files will be
+                done on the threads in the pool.
         """
         self.verbose = verbose
-        self.filterData = filterData
-        self.fastload = fastload
         self.filepath = path
         self.fileName = os.path.splitext(os.path.basename(path))[0]
+        self.parallelLoad = parallelPool is not None
+        self.parallelPool = parallelPool
         self.Channels = []
         self.Groups = []
+        
+        if self.parallelLoad:
+            print(f'INFO: Using {len(mp.active_children())} processes to load data.')
+        
         self.read()
         self.connect()
 
@@ -73,7 +79,7 @@ class APReader:
         # loop through channels
         for channel in self.Channels:
             # if the current channel length has not been analyzed yet
-            if not channel.length in channelGroups:
+            if channel.length not in channelGroups:
                 # add a new dictionary entry
                 channelGroups[channel.length] = []
             
@@ -101,9 +107,15 @@ class APReader:
 
                 # instead of assuming, ask the user if the timechannel is the one with "seconds"
                 if "s" == channel.unit:
+                    # this should be uncommented for the testing timing functions to be usable
+                    # timeChannel = channel
+                    # break
+                
                     if input(f"Is '{channel.Name}' your time/reference channel? [y/n] ") == "y":
                         timeChannel = channel
                         break
+# %%
+
             #%% sdasd
             # set the time-channel on every channel but itself
             if timeChannel != None:
@@ -120,6 +132,10 @@ class APReader:
             
             # create new group based on the groups listed
             self.Groups.append(Group(group, self.fileName, self.verbose))
+        
+        if len(self.Channels) > 0:
+            self.date = self.Channels[0].date
+        
         pass
 
     def __iter__(self):
@@ -153,7 +169,7 @@ class APReader:
             # readaway
             for i in range(32):
                 lresakt = reader.read_int16()
-                resString = reader.read_string(lresakt)
+                _ = reader.read_string(lresakt)
 
             # total number of channels
             self.numChannels = reader.read_int16()
@@ -167,13 +183,14 @@ class APReader:
                 reader.read_int32()
             
             # reduced factor (unused)
-            redfac = reader.read_int32()
+            _ = reader.read_int32()
 
             # loop channels
             for i in range(self.numChannels):
                 # create new channel on top of reader
                 #! be careful with current stream position
-                channel = Channel(reader, self.fileName, self.verbose, self.filterData, self.fastload)
+                channel = Channel(reader, self.fileName, self.filepath,\
+                    self.verbose, self.parallelPool)
 
                 if not channel.broken and channel.length > 0:                    
                     self.Channels.append(channel)
@@ -197,12 +214,6 @@ class APReader:
     def plot(self, groupIndices=None):
         """Plots the complete file.
         """
-        name = os.path.basename(self.filepath)
-        
-        groups = self.Groups
-        if groupIndices is not None:
-            groups = [self.Groups[x] for x in groupIndices]
-
         for group in self.Groups:
             group.plot()     
             
