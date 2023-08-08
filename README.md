@@ -3,6 +3,7 @@
 [![PyPi Upload](https://github.com/leonbohmann/APReader/actions/workflows/python-publish.yml/badge.svg)](https://github.com/leonbohmann/APReader/actions/workflows/python-publish.yml)
 ![pyPI - Version](https://img.shields.io/pypi/v/apread?label=package%20version)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/apread?color=green&label=PyPi%20Downloads&style=plastic)
+[![Downloads](https://static.pepy.tech/personalized-badge/apread?period=total&units=international_system&left_color=grey&right_color=brightgreen&left_text=Total%20Downloads)](https://pepy.tech/project/apread)
 
 ## Support this project
 <a href="https://www.buymeacoffee.com/leonbohmann" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
