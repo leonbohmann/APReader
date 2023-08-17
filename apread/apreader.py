@@ -209,7 +209,14 @@ class APReader:
 
             if self.verbose:
                 print(f'\t[ {self.fileName} ] Done. {len(self.Channels)} Channels left after filtering.') 
+       
+    def collectChannels(self, channel_names: list[str]):
+        chans = []
+        for c in self.Channels:
+            if any([x in c.Name for x in channel_names]):
+                chans.append(c)
                 
+        return chans
                 
     def plot(self, groupIndices=None):
         """Plots the complete file.
