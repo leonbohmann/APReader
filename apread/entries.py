@@ -489,7 +489,8 @@ class Group:
         axis = ax1
         for i,channel in enumerate(channels):            
             if i > 0:
-                axis = ax1.twinx()            
+                axis = ax1.twinx()
+                axis.spines['right'].set_position(('outward', 60*(i-1)))     
             axis.set_ylabel(channel.unit)
             axis.tick_params(axis='y', colors=cmap(i))
             axis.get_yaxis().label.set_color(cmap(i))  
