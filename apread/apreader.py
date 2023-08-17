@@ -8,12 +8,18 @@ from typing import List
 
 from matplotlib import pyplot as plt
 from tqdm import tqdm
+import numpy as np
 
 # binary reader to read binary files
 from apread.binaryReader import BinaryReader
 
 # channel definition
 from apread.entries import Channel, Group
+
+def get_cmap(n, name='jet'):
+    '''Returns a function that maps each index in 0, 1, ..., n-1 to a distinct 
+    RGB color; the keyword argument name must be a standard mpl colormap name.'''
+    return plt.cm.get_cmap(name, n)
 
 def plot_multiple_datasets(datasets):
     """
@@ -23,10 +29,13 @@ def plot_multiple_datasets(datasets):
     datasets (list of tuples): Each tuple should contain (x, y, color, ylabel, title)
     """
     fig, ax = plt.subplots()
-
+    cmap = get_cmap(len(datasets)+1)
     for i, data in enumerate(datasets):
         x, y, color, ylabel, title = data
 
+        if color is None: 
+            color = cmap(i)
+            
         if i == 0:
             ax1 = ax
         else:
@@ -247,7 +256,7 @@ class APReader:
         chans = []
         for c in self.Channels:
             if any([x in c.Name for x in channel_names]):
-                chans.append((c.Time.data, c.data, 'g--', f'{c.Name}[{c.unit}]', c.Name))
+                chans.append((c.Time.data, c.data, None, f'{c.Name}[{c.unit}]', c.Name))
                 
         return chans
               
