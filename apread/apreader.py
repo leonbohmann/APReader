@@ -9,7 +9,8 @@ from typing import List
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 import numpy as np
-
+import numpy.typing as nptyp
+from typing import Tuple
 # binary reader to read binary files
 from apread.binaryReader import BinaryReader
 
@@ -21,7 +22,8 @@ def get_cmap(n, name='jet'):
     RGB color; the keyword argument name must be a standard mpl colormap name.'''
     return plt.cm.get_cmap(name, n)
 
-def plot_multiple_datasets(datasets):
+def plot_multiple_datasets(datasets: list[Tuple[nptyp.NDArray, nptyp.NDArray, str, str, str]]\
+        , plt_title = ''):
     """
     Plots multiple datasets on the same plot with separate y-axes.
 
@@ -46,7 +48,7 @@ def plot_multiple_datasets(datasets):
         ax1.set_ylabel(ylabel, color=color)
         ax1.tick_params(axis='y', colors=color)
 
-    plt.title(title)
+    plt.title(plt_title)
     plt.tight_layout()
     plt.show()
 
@@ -252,7 +254,7 @@ class APReader:
                 
         return chans
       
-    def collectDatasets(self, channel_names: list[str]):
+    def collectDatasets(self, channel_names: list[str]) -> list[Tuple[nptyp.NDArray, nptyp.NDArray, str, str, str]]:
         chans = []
         for c in self.Channels:
             if any([x in c.Name for x in channel_names]):
