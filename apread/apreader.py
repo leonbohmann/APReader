@@ -15,6 +15,31 @@ from apread.binaryReader import BinaryReader
 # channel definition
 from apread.entries import Channel, Group
 
+def plot_multiple_datasets(datasets):
+    """
+    Plots multiple datasets on the same plot with separate y-axes.
+
+    Parameters:
+    datasets (list of tuples): Each tuple should contain (x, y, color, ylabel, title)
+    """
+    fig, ax = plt.subplots()
+
+    for i, data in enumerate(datasets):
+        x, y, color, ylabel, title = data
+
+        if i == 0:
+            ax1 = ax
+        else:
+            ax1 = ax.twinx()
+            ax1.spines['right'].set_position(('outward', 60*(i-1)))
+
+        ax1.plot(x, y, color=color)
+        ax1.set_ylabel(ylabel, color=color)
+        ax1.tick_params(axis='y', colors=color)
+
+    plt.title(title)
+    plt.tight_layout()
+    plt.show()
 
 def align_yaxis(ax1, v1, ax2, v2):
     """adjust ax2 ylimit so that v2 in ax2 is aligned to v1 in ax1"""
