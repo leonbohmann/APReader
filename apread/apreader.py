@@ -242,7 +242,15 @@ class APReader:
                 chans.append(c)
                 
         return chans
+      
+    def collectDatasets(self, channel_names: list[str]):
+        chans = []
+        for c in self.Channels:
+            if any([x in c.Name for x in channel_names]):
+                chans.append((c.Time.data, c.data, 'g--', f'{c.Name}[{c.unit}]', c.Name))
                 
+        return chans
+              
     def plot(self, groupIndices=None):
         """Plots the complete file.
         """
