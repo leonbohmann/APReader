@@ -44,13 +44,14 @@ def plot_multiple_datasets(datasets: list[Tuple[nptyp.NDArray, nptyp.NDArray, st
             ax1 = ax.twinx()
             ax1.spines['right'].set_position(('outward', 60*(i-1)))
 
-        ax1.plot(x, y, color=color)
-        ax1.set_ylabel(ylabel, color=color)
-        ax1.tick_params(axis='y', colors=color)
+        l = ax1.plot(x, y, color)[0]
+        ax1.set_ylabel(ylabel, color=l.get_color())
+        ax1.tick_params(axis='y', colors=l.get_color())
 
     plt.title(plt_title)
     plt.tight_layout()
     plt.show()
+    return fig
 
 def align_yaxis(ax1, v1, ax2, v2):
     """adjust ax2 ylimit so that v2 in ax2 is aligned to v1 in ax1"""
