@@ -287,3 +287,11 @@ class APReader:
         """
         for group in self.Groups:
             group.plot(range(start,end))                         
+            
+            
+    def printSummary(self):
+        for group in self.Groups:
+            print('---------')
+            print(group.Name)
+            for channel in group.ChannelsY:
+                print(f'\t{channel.Name} ({len(channel.data)})')
