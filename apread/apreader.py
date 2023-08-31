@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import multiprocessing as mp
 import os
 import re
@@ -32,6 +34,7 @@ def plot_multiple_datasets(datasets: list[Tuple[nptyp.NDArray, nptyp.NDArray, st
     """
     fig, ax = plt.subplots()
     cmap = get_cmap(len(datasets)+1)
+    lbs = []
     for i, data in enumerate(datasets):
         x, y, color, ylabel, title = data
 
@@ -44,14 +47,16 @@ def plot_multiple_datasets(datasets: list[Tuple[nptyp.NDArray, nptyp.NDArray, st
             ax1 = ax.twinx()
             ax1.spines['right'].set_position(('outward', 60*(i-1)))
 
-        l = ax1.plot(x, y, color)[0]
+        l = ax1.plot(x, y, color, label=title)[0]
         ax1.set_ylabel(ylabel, color=l.get_color())
         ax1.tick_params(axis='y', colors=l.get_color())
+        lbs.append((l, ylabel))
 
-    plt.title(plt_title)
-    plt.tight_layout()
+    ax.legend([x[0] for x in lbs], [x[1] for x in lbs])
+    ax.set_title(plt_title)
+    # fig.tight_layout()
     plt.show()
-    return fig
+    return fig,ax
 
 def align_yaxis(ax1, v1, ax2, v2):
     """adjust ax2 ylimit so that v2 in ax2 is aligned to v1 in ax1"""
@@ -245,11 +250,16 @@ class APReader:
             if self.verbose:
                 print(f'\t[ {self.fileName} ] Done. {len(self.Channels)} Channels left after filtering.') 
        
-    def collectChannels(self, channel_names: list[str]):
+    def collectChannels(self, channel_names: list[str]) -> list[Channel]:
         chans = []
-        for c in self.Channels:
-            if any([x in c.Name for x in channel_names]):
-                chans.append(c)
+        
+        for cname in channel_names:
+            for c in self.Channels:
+                if c.Name == cname:
+                    chans.append(c)
+        # for c in self.Channels:
+        #     if any([x in c.Name for x in channel_names]):
+        #         chans.append(c)
                 
         return chans
       
