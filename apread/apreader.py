@@ -22,7 +22,7 @@ from apread.entries import Channel, Group
 def get_cmap(n, name='jet'):
     '''Returns a function that maps each index in 0, 1, ..., n-1 to a distinct 
     RGB color; the keyword argument name must be a standard mpl colormap name.'''
-    return plt.cm.get_cmap(name, n)
+    return plt.get_cmap(name, n)
 
 def plot_multiple_datasets(datasets: list[Tuple[nptyp.NDArray, nptyp.NDArray, str, str, str]]\
         , plt_title = ''):
@@ -33,13 +33,11 @@ def plot_multiple_datasets(datasets: list[Tuple[nptyp.NDArray, nptyp.NDArray, st
     datasets (list of tuples): Each tuple should contain (x, y, color, ylabel, title)
     """
     fig, ax = plt.subplots()
-    cmap = get_cmap(len(datasets)+1)
+    cmap = get_cmap(len(datasets)+5, name='Set1')
     lbs = []
     for i, data in enumerate(datasets):
-        x, y, color, ylabel, title = data
+        x, y, style, ylabel, title = data
 
-        if color is None: 
-            color = cmap(i)
             
         if i == 0:
             ax1 = ax
@@ -47,14 +45,18 @@ def plot_multiple_datasets(datasets: list[Tuple[nptyp.NDArray, nptyp.NDArray, st
             ax1 = ax.twinx()
             ax1.spines['right'].set_position(('outward', 60*(i-1)))
 
-        l = ax1.plot(x, y, color, label=title)[0]
+        if style is None: 
+            l = ax1.plot(x, y, color=cmap(i), label=title)[0]
+        else:
+            l = ax1.plot(x, y, style, label=title)[0]
+            
         ax1.set_ylabel(ylabel, color=l.get_color())
         ax1.tick_params(axis='y', colors=l.get_color())
         lbs.append((l, ylabel))
 
     ax.legend([x[0] for x in lbs], [x[1] for x in lbs])
     ax.set_title(plt_title)
-    # fig.tight_layout()
+    fig.tight_layout()
     plt.show()
     return fig,ax
 

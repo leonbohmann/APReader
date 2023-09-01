@@ -90,7 +90,7 @@ class Channel:
         self.verbose = verbose
 
         # referenced time channel (dummy, since this may stay None)
-        self.Time = None
+        self.Time: Channel = None
         self.isTime = False
         # save the reader for later use
         self.reader = reader
