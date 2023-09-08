@@ -273,11 +273,11 @@ class APReader:
                 
         return chans
               
-    def plot(self, groupIndices=None):
+    def plot(self, groupIndices=None, sameAxis = False):
         """Plots the complete file.
         """
         for group in self.Groups:
-            group.plot()     
+            group.plot(sameAxis = sameAxis)     
             
     def plotGroup(self, channelIndex):
         """Plot a specific channel

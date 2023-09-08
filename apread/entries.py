@@ -460,7 +460,7 @@ class Group:
         """
         self.plot(range(start,end))
     
-    def plot(self, channelIndices=None):
+    def plot(self, channelIndices=None, sameAxis = False):
         """
         Plots this group of channels.
         
@@ -488,7 +488,7 @@ class Group:
         
         axis = ax1
         for i,channel in enumerate(channels):            
-            if i > 0:
+            if i > 0 and not sameAxis:
                 axis = ax1.twinx()
                 axis.spines['right'].set_position(('outward', 60*(i-1)))     
             axis.set_ylabel(channel.unit)
