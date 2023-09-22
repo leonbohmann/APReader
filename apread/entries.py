@@ -91,6 +91,7 @@ class Channel:
 
         # referenced time channel (dummy, since this may stay None)
         self.Time: Channel = None
+        "Time channel."
         self.isTime = False
         # save the reader for later use
         self.reader = reader

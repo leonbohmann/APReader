@@ -252,7 +252,7 @@ class APReader:
             if self.verbose:
                 print(f'\t[ {self.fileName} ] Done. {len(self.Channels)} Channels left after filtering.') 
        
-    def collectChannels(self, channel_names: list[str]) -> list[Channel]:
+    def collectChannels(self, channel_names: list[str]) -> list[Channel] | Channel:
         chans = []
         
         for cname in channel_names:
@@ -263,7 +263,7 @@ class APReader:
         #     if any([x in c.Name for x in channel_names]):
         #         chans.append(c)
                 
-        return chans
+        return chans if len(chans) > 1 else chans[0]
       
     def collectDatasets(self, channel_names: list[str]) -> list[Tuple[nptyp.NDArray, nptyp.NDArray, str, str, str]]:
         chans = []
