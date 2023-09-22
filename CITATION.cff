@@ -3,7 +3,8 @@ message: "If you use this software, please cite it as below."
 authors:
   - family-names: Bohmann
     given-names: Leon
-    doi: 10.5281/zenodo.8369804
+doi: 10.5281/zenodo.8369804
 title: leonbohmann/APReader: v1.1.2
 version: v1.1.2
 date-released: 2023-09-22
+url: "https://github.com/leonbohmann/APReader"
