@@ -23,6 +23,20 @@
 
 ## Cite this project
 
+If you use this software in any of your work, please cite it using the "Cite this repository" button in the right sidebar or use this:
+
+```
+@software{leonbohmann_APReader,
+   author = {Bohmann, Leon},
+   doi = {10.5281/zenodo.8369804},
+   month = sep,
+   title = {{leonbohmann/APReader: v1.1.2}},
+   url = {https://github.com/leonbohmann/APReader},
+   version = {v1.1.2},
+   year = {2023}
+}
+```
+
 ## General
 
 > Read binary files produced from catmanAP projects directly into python.
