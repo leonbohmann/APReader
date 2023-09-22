@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import multiprocessing as mp
 import os
 import re
@@ -8,13 +10,55 @@ from typing import List
 
 from matplotlib import pyplot as plt
 from tqdm import tqdm
-
+import numpy as np
+import numpy.typing as nptyp
+from typing import Tuple
 # binary reader to read binary files
 from apread.binaryReader import BinaryReader
 
 # channel definition
 from apread.entries import Channel, Group
 
+def get_cmap(n, name='jet'):
+    '''Returns a function that maps each index in 0, 1, ..., n-1 to a distinct 
+    RGB color; the keyword argument name must be a standard mpl colormap name.'''
+    return plt.get_cmap(name, n)
+
+def plot_multiple_datasets(datasets: list[Tuple[nptyp.NDArray, nptyp.NDArray, str, str, str]]\
+        , plt_title = ''):
+    """
+    Plots multiple datasets on the same plot with separate y-axes.
+
+    Parameters:
+    datasets (list of tuples): Each tuple should contain (x, y, color, ylabel, title)
+    """
+    fig, ax = plt.subplots()
+    cmap = get_cmap(len(datasets)+5, name='Set1')
+    lbs = []
+    for i, data in enumerate(datasets):
+        x, y, style, ylabel, title = data
+
+            
+        if i == 0:
+            ax1 = ax
+        else:
+            ax1 = ax.twinx()
+            ax1.spines['right'].set_position(('outward', 60*(i-1)))
+
+        if style is None: 
+            l = ax1.plot(x, y, color=cmap(i), label=title)[0]
+        else:
+            l = ax1.plot(x, y, style, label=title)[0]
+            
+        ax1.set_ylabel(ylabel, color=l.get_color())
+        ax1.tick_params(axis='y', colors=l.get_color())
+        lbs.append((l, ylabel))
+
+    ax.legend([x[0] for x in lbs], [x[1] for x in lbs])
+    ax.set_title(plt_title)
+    fig.tight_layout()
+    plt.show()
+    return fig,ax
 
 def align_yaxis(ax1, v1, ax2, v2):
     """adjust ax2 ylimit so that v2 in ax2 is aligned to v1 in ax1"""
@@ -114,9 +158,7 @@ class APReader:
                     if input(f"Is '{channel.Name}' your time/reference channel? [y/n] ") == "y":
                         timeChannel = channel
                         break
-# %%
-
-            #%% sdasd
+                                
             # set the time-channel on every channel but itself
             if timeChannel != None:
                 for channel in group:
@@ -209,13 +251,33 @@ class APReader:
 
             if self.verbose:
                 print(f'\t[ {self.fileName} ] Done. {len(self.Channels)} Channels left after filtering.') 
+       
+    def collectChannels(self, channel_names: list[str]) -> list[Channel] | Channel:
+        chans = []
+        
+        for cname in channel_names:
+            for c in self.Channels:
+                if c.Name == cname:
+                    chans.append(c)
+        # for c in self.Channels:
+        #     if any([x in c.Name for x in channel_names]):
+        #         chans.append(c)
                 
+        return chans if len(chans) > 1 else chans[0]
+      
+    def collectDatasets(self, channel_names: list[str]) -> list[Tuple[nptyp.NDArray, nptyp.NDArray, str, str, str]]:
+        chans = []
+        for c in self.Channels:
+            if any([x in c.Name for x in channel_names]):
+                chans.append((c.Time.data, c.data, None, f'{c.Name}[{c.unit}]', c.Name))
                 
-    def plot(self, groupIndices=None):
+        return chans
+              
+    def plot(self, groupIndices=None, sameAxis = False):
         """Plots the complete file.
         """
         for group in self.Groups:
-            group.plot()     
+            group.plot(sameAxis = sameAxis)     
             
     def plotGroup(self, channelIndex):
         """Plot a specific channel
@@ -235,3 +297,11 @@ class APReader:
         """
         for group in self.Groups:
             group.plot(range(start,end))                         
+            
+            
+    def printSummary(self):
+        for group in self.Groups:
+            print('---------')
+            print(group.Name)
+            for channel in group.ChannelsY:
+                print(f'\t{channel.Name} ({len(channel.data)})')

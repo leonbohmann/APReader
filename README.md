@@ -1,12 +1,27 @@
-# **apread** (Catman AP Reader)
+<div align="center">
+   <img src="logo.svg" height="200">
+</div>
+
+<div align="center">
+  <h1>
+  apread
+  </h1>
+  <h3>
+  previously: Catman Reader
+  </h3>
+</div>
+
 
 [![PyPi Upload](https://github.com/leonbohmann/APReader/actions/workflows/python-publish.yml/badge.svg)](https://github.com/leonbohmann/APReader/actions/workflows/python-publish.yml)
 ![pyPI - Version](https://img.shields.io/pypi/v/apread?label=package%20version)
 ![PyPI - Downloads](https://img.shields.io/pypi/dm/apread?color=green&label=PyPi%20Downloads&style=plastic)
 [![Downloads](https://static.pepy.tech/personalized-badge/apread?period=total&units=international_system&left_color=grey&right_color=brightgreen&left_text=Total%20Downloads)](https://pepy.tech/project/apread)
 
+
 ## Support this project
 <a href="https://www.buymeacoffee.com/leonbohmann" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
+
+## Cite this project
 
 ## General
 
@@ -102,14 +117,14 @@ The same can be applied to the `APReader`. The only difference is that you can p
 reader.plotGroup(0)           # specific group
 reader.plotGroups(0,3)        # group 1 to 3 (1,2,3)
 reader.plot([0, 2, 4])        # group 1, 3 and 5
-``` 
+```
 
 ### External Header
 
 Thanks to ([hakonbars PR13](https://github.com/leonbohmann/APReader/pull/13)) you are now able to access external header information using `channel.exthdr`, a dicitionary containing all keys as described in [this sheet](https://github.com/leonbohmann/APReader/blob/dev-2/test/catmanBinaryFormat.xls).
 
 ```python
-['T0']                 # ACQ timestamp info (NOW format) 
+['T0']                 # ACQ timestamp info (NOW format)
 ['dt']                 # ACQ delta t in ms
 ['SensorType']         # IDS code of sensor type
 ['SupplyVoltage']      # IDS code supply voltage
@@ -137,7 +152,7 @@ Thanks to ([hakonbars PR13](https://github.com/leonbohmann/APReader/pull/13)) yo
 ['WriteProtected']     # If true, write access is denied
 ['NominalRange']       # CAV value
 ['CLCFactor']          # Cable length compensation factor (CANHEAD only)
-['ExportFormat']       # 0=8-Byte Double, 1=4-Byte Single, 2=2-Byte Integer (FOR CATMAN BINARY EXPORT ONLY!)    
+['ExportFormat']       # 0=8-Byte Double, 1=4-Byte Single, 2=2-Byte Integer (FOR CATMAN BINARY EXPORT ONLY!)
 ```
 
 ### Parallel reading of data
@@ -153,7 +168,7 @@ import multiprocessing as mp
 
 if __name__ == '__main__': # this line has to be included!
     # without 'processes=...'!
-    pool = mp.Pool() 
+    pool = mp.Pool()
 
     # pass the pool to the reader
     reader = APReader(file, parallelPool=pool)
@@ -179,7 +194,7 @@ The results from `APReader` stay the same and you can continue your analysis.
   * Max degree of parallelism is automatically set to amount of available cores
 * ----------------------------
 * ----------------------------
-  
+
 #### Version 1.1
 
 ##### Breaking changes
@@ -200,7 +215,7 @@ The results from `APReader` stay the same and you can continue your analysis.
 #### Version 1.0.22
 
 * Fixed an issue with groups where time channels are not recognized
-* now, user is prompted, when suspected time channel is found  
+* now, user is prompted, when suspected time channel is found
 * plotting is not possible when there is no time-channel found
 * save groups and channels even when there is no time channel
 
@@ -210,7 +225,7 @@ The results from `APReader` stay the same and you can continue your analysis.
 
 #### Version 1.0.20
 
-* Switched to explicit type hinting with `typing` package (compatibility issues with python <3.9.x)  
+* Switched to explicit type hinting with `typing` package (compatibility issues with python <3.9.x)
 
 #### Version 1.0.15/16
 
