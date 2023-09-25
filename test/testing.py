@@ -40,3 +40,11 @@ if __name__ == '__main__':
     if loadInParallel:
         pool.close()
         pool.join()
+
+
+
+
+def example1():
+    """Example function showcasing quick usage of the APReader class with multiprocessing support."""
+    with mp.Pool() as pool:
+        reader = APReader("input.bin", parallelPool=pool)
