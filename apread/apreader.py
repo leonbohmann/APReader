@@ -144,7 +144,7 @@ class APReader:
             timeChannel = None
             for channel in group:
                 # condition: channel name has to contain "Zeit"
-                if re.match(r"([T|t]ime)|([Z|z]eit)",channel.Name) is not None:
+                if re.search(r"([T|t]ime)|([Z|z]eit)",channel.Name) is not None:
                     timeChannel = channel
                     # there is only one time-channel
                     break
