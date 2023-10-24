@@ -272,7 +272,7 @@ class Channel:
         """
         return self.data[key]
     
-    def plot(self, governed = False, axes=None, clr='b-'):
+    def plot(self, governed = False, axes=None, clr='b'):
         """
         Plot the channel over its connected time-channel.
 
