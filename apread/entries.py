@@ -503,6 +503,7 @@ class Group:
         labs = [l.get_label() for l in lns]
         ax1.legend(lns, labs, loc=0)
         ax1.grid()
+        ax1.autoscale()
 
         plt.title(self.Name)
         plt.draw()
