@@ -73,6 +73,19 @@ class Channel:
     # The parallel pool which holds parallel processes.
     parallelPool: mpPool
 
+
+    @property
+    def Time(self):
+        """Time channel that this channel is recorded on."""
+        if self.__timechannel is None:
+            raise Exception(f"Channel '{self.Name}' does not have a time channel!")
+        return self.__timechannel
+
+    @Time.setter
+    def Time(self, v):
+        if self.__timechannel is not v:
+            self.__timechannel = v
+
     def __init__(self, reader: BinaryReader, fileName='unknown', filepath='', \
         verbose=False, parallelPool=None):
         """
@@ -90,7 +103,7 @@ class Channel:
         self.verbose = verbose
 
         # referenced time channel (dummy, since this may stay None)
-        self.Time: Channel = None
+        self.__timechannel: Channel = None
         "Time channel."
         self.isTime = False
         # save the reader for later use
@@ -380,6 +393,12 @@ class Group:
     # fully qualifying name
     fullName: str
 
+    @property
+    def ChannelX(self):
+        if self.__channelX is None:
+            raise Exception(f"Group '{self.Name}' does not have a time channel!")
+        return self.__channelX
+
     def __init__(self, channels: List[Channel], fileName='unknown', verbose=False):
         """Create group of channels.
 
@@ -391,12 +410,13 @@ class Group:
         self.Channels = channels
         # get first channel which is marked as "isTime"
         timeC = next((x for x in channels if x.isTime), None)
-        self.ChannelX = timeC
+        self.__channelX = timeC
 
         if timeC is None:
             # if no time found, group cant be shown
             if self.verbose:
                 print('\t[ APREAD/WARNING ] Group does not have a time-channel. Skipping...')
+            self.Name = "Untimed"
         elif timeC is not None:
             # get name of time channel
             self.Name = timeC.Name
@@ -413,22 +433,31 @@ class Group:
             if not chan.isTime:
                 self.ChannelsY.append(chan)
 
-        # determine frequency and time delta unit
-        unit = 's'
-        fac = 1
-        if timeC.data[1] < 1:
-            unit = 'ms'
-            fac = 1e3
-        if timeC.data[1] < 1e-3:
-            unit = 'μs'
-            fac = 1e6
-        if timeC.data[1] < 1e-6:
-            unit = 'ns'
-            fac = 1e9
+        if timeC is not None:
+            # determine frequency and time delta unit
+            unit = 's'
+            fac = 1
+            if timeC.data[1] < 1:
+                unit = 'ms'
+                fac = 1e3
+            if timeC.data[1] < 1e-3:
+                unit = 'μs'
+                fac = 1e6
+            if timeC.data[1] < 1e-6:
+                unit = 'ns'
+                fac = 1e9
 
-        self.intervalstr = f"{timeC.data[1]*fac:.3f}{unit}"
-        self.interval = timeC[1]
-        self.frequency = 1/timeC.data[1]
+
+
+            self.intervalstr = f"{timeC.data[1]*fac:.3f}{unit}"
+            self.interval = timeC[1]
+            self.frequency = 1/timeC.data[1]
+        else:
+            self.intervalstr = "0"
+            self.interval = 0
+            self.frequency = 0
+
+
 
     def __getitem__(self, key):
         """Return the time and all y-channels at index.
@@ -437,11 +466,18 @@ class Group:
             key (int): index
 
         Returns:
-            double: self.data[key]
+            (Time, Y1, Y2, ..., Yn), if there is a time channel.
+            (Y1, Y2, ..., Yn), if there is no time channel.
         """
+        if self.ChannelX is None:
+            return [chan[key] for chan in self.ChannelsY]
+
         return (self.ChannelX[key], [chan[key] for chan in self.ChannelsY])
 
     def __str__(self):
+        if self.ChannelX is None:
+            return f'Group "{self.Name}" ({len(self.ChannelsY)} Data-channels, NO TIME CHANNEL)'
+
         return f'Group "{self.Name}" ({len(self.ChannelsY)} Data-channels, {self.ChannelX.length} Entries)'
 
     def plotChannel(self, channelIndex):
@@ -473,6 +509,10 @@ class Group:
             grp.plot([0]) will plot the first data channel
             grp.plot([0, 1, 3]) will plot the first, second and third data channel
         """
+        if self.ChannelX is None:
+            print("Can't plot group because there is no time channel available!")
+            return
+
         fig, ax1 = plt.subplots()
         ax1.set_xlabel(self.ChannelX.unit)
 
