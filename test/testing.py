@@ -8,7 +8,7 @@ if __name__ == '__main__':
 
     # find current directory
     dirname = os.path.dirname(__file__)
-    file = os.path.join(dirname, 'Example_Catman_Data.bin')
+    file = os.path.join(dirname, 'MoSeS_Dauermessung_R4F_2023_05_22_13_04_09.bin')
 
     outdir = os.path.join(dirname, 'output')
 
@@ -42,6 +42,7 @@ if __name__ == '__main__':
         pool.join()
 
 
+    reader.printSummary()
 
 
 def example1():
