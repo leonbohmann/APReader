@@ -168,9 +168,7 @@ class APReader:
                     else:
                         channel.isTime = True
             else:
-                print("\t [ERROR] Channel-group does not contain a time-channel!")
-                print("\t  The current group will not be included in this output.")
-                continue
+                print("\t [Warning] Channel-group does not contain a time-channel!")
 
             # create new group based on the groups listed
             self.Groups.append(Group(group, self.fileName, self.verbose))
@@ -249,8 +247,13 @@ class APReader:
             if self.verbose:
                 print(f'\t[ {self.fileName} ] Reading Channels...')
 
+            if self.verbose:
+                iterator = tqdm(self.Channels, leave=False)
+            else:
+                iterator = self.Channels
+
             # loop through channels again and access data one after another
-            for channel in tqdm(self.Channels, leave=False):
+            for channel in iterator:
                 channel.readData()
 
             if self.verbose:
