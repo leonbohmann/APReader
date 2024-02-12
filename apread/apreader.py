@@ -203,7 +203,7 @@ class APReader:
             self.fileID = reader.read_int16()
 
             if self.fileID < 5010:
-                raise Exception('Only catmanAP v4.x+ are supported, sorry!')
+                print('Only catmanAP v4.x+ are officially supported. Use this with caution!')
 
             # this is the byte offset, at which the data starts
             self.dataOffset = reader.read_int32()
